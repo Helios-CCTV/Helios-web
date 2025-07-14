@@ -1,30 +1,30 @@
 @font-face {
-  font-family: "ExtraBold";
+  font-family: "NanumSquare";
   src: url("src/assets/fonts/NanumSquareOTF_acEB.otf");
   font-weight: 700;
 }
 
 @font-face {
-  font-family: "Bold";
+  font-family: "NanumSquare";
   src: url("src/assets/fonts/NanumSquareOTF_acB.otf");
   font-weight: 600;
 }
 
 @font-face {
-  font-family: "Regular";
+  font-family: "NanumSquare";
   src: url("src/assets/fonts/NanumSquareOTF_acR.otf");
   font-weight: 500;
 }
 
 @font-face {
-  font-family: "Light";
+  font-family: "NanumSquare";
   src: url("src/assets/fonts/NanumSquareOTF_acL.otf");
   font-weight: 400;
 }
 
 
 body {
-  font-family: "Bold", sans-serif;
+  font-family: "NanumSquare", sans-serif;
 }
 
 @import "tailwindcss";
