@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function ViewStatus() {
   return (
-  <div className='w-full h-screen pt-[15vh] text-[35px] flex flex-col gap-[15vh]'>
+  <div className='w-full h-screen pt-[15vh] text-[35px] flex flex-col gap-[15vh] justify-center items-center'>
       <div className='flex gap-[10vw] justify-center items-center'>
         <div className='font-[700] text-[35px] flex flex-col'>
           <div>
@@ -18,12 +18,12 @@ export default function ViewStatus() {
 
         </div>
 
-        <img className='w-[250px] h-[200px]' src="src/assets/mainPage/mainPageMapImage.png" alt="map" />
+        <img className='w-[270px] h-[200px]' src="src/assets/mainPage/mainPageMapImage.png" alt="map" />
       </div>
 
 
       <div className='flex gap-[10vw] justify-center items-center'>
-        <img className='w-[250px] h-[200px]' src="src/assets/mainPage/mainPageDangerImage.png" alt="danger" />
+        <img className='w-[270px] h-[200px]' src="src/assets/mainPage/mainPageDangerImage.png" alt="danger" />
         <div className='font-[700] text-[35px] flex flex-col'>
           <div>
             <div>파손된 도로를 AI가 찾아</div>
