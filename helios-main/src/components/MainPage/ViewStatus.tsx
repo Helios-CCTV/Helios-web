@@ -2,6 +2,7 @@ import React from 'react'
 
 export default function ViewStatus() {
   return (
+  // CCTV 현황을 볼 수 있습니다.
   <div className='w-full h-screen pt-[15vh] text-[35px] flex flex-col gap-[15vh] justify-center items-center'>
       <div className='flex gap-[10vw] justify-center items-center'>
         <div className='font-[700] text-[35px] flex flex-col'>
