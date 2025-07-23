@@ -6,10 +6,12 @@ export default function Slogan() {
     <>
     {/* 전체 div */}
     <div className="w-screen min-h-screen flex items-start justify-center relative">
+
       {/* gradation 적용 */}
-      <div className='fixed bg-gradient-to-b from-white to-white/0 z-50 h-[10%] w-full top-[7.3vh]'></div>
+      <div className='absolute bg-gradient-to-b from-white to-white/0 z-50 h-[10%] w-full top-[7.3vh]'></div>
       {/* 로고 */}
       <img className="absolute w-full h-[99vh] mt-[7.3vh] object-cover" src="src/assets/backgroundImage.png" alt="slogan" />
+      
       {/* <div className='bg-cover bg-center relative w-full h-[99vh] mt-[7.3vh] object-cover' style={{backgroundImage: `url('src/assets/backgroundImage.png')`}}></div> */}
 
 
