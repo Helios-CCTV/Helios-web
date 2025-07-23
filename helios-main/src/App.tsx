@@ -1,14 +1,12 @@
 import { useState } from 'react'
-
+import MainPage from './pages/MainPage/MainPage'
 
 function App() {
   
 
   return (
     <>
-      <div className="bg-red-200 m-25">
-        <div className="font-bold">hello world</div>
-      </div>
+      <MainPage/>
     </>
   )
 }
