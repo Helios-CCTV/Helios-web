@@ -6,7 +6,7 @@ export default function Banner() {
 
   return (
     <>
-      <div className='fixed top-0 left-0 w-full z-50 flex bg-white justify-between px-[11.8vw] py-[1vh] shadow-md'>
+      <div className='fixed top-0 left-0 w-full z-50 flex bg-white justify-between px-[11.8vw] py-[0.3vh] shadow-md'>
         <div className='flex'>
           <img className='size-[50px]' src="src/assets/logo.png" alt="logo" />
           <div className='font-[700] text-[20px] flex justify-center items-center'>Helios</div>
