@@ -1,13 +1,16 @@
+import { Routes, Route } from 'react-router-dom'
 import { useState } from 'react'
 import MainPage from './pages/MainPage/MainPage'
+import MapPage from './pages/MainPage/CCTVLive/MapPage'
 
 function App() {
   
 
   return (
-    <>
-      <MainPage/>
-    </>
+    <Routes>
+      <Route path='/' element= { <MainPage />}></Route>
+      <Route path='/MapPage' element= { <MapPage />}></Route>
+    </Routes>
   )
 }
 
