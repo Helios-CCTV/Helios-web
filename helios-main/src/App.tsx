@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { useState } from 'react'
 import MainPage from './pages/MainPage/MainPage'
-import MapPage from './pages/MainPage/CCTVLive/MapPage'
+import MapPage from './pages/CCTVLive/MapPage'
 
 function App() {
   
