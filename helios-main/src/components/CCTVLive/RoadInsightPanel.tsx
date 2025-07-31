@@ -5,7 +5,7 @@ import React from 'react'
 export default function RoadInsightPanel() {
   return (
     <>
-      <div className='flex w-[22vw] h-auto z-50 absolute mt-[79px] pb-[24px] ml-[24px] bg-zinc-50 justify-center rounded-xl shadow-lg'>
+      <div className='flex w-[315px] h-auto z-50 absolute mt-[79px] pb-[24px] ml-[24px] bg-zinc-50 justify-center rounded-xl shadow-lg'>
         <div className='flex flex-col items-center w-full px-4'>
           <div className='relative flex items-center w-full h-[4.8vh] mt-[24px]'>
             <input
