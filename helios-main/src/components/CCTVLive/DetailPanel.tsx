@@ -8,118 +8,134 @@ export default function DetailPanel() {
       <div className="flex items-center w-full h-[70px] pl-[24px] bg-sky-500 text-white text-[18px] font-bold rounded-t-md flex-shrink-0">
         CCTV 정보 보기
       </div>
-      {/* CCTV 실시간 탐지 결과 섹션*/}
-      <div className="text-[25px] font-[500] pl-[24px] mt-[30px]">
-        실시간 탐지 결과
-      </div>
-      <div className="text-[20px] text-sky-500 font-[700] pl-[24px] mt-[30px]">
-        최근 도로 파손 유형 및 평균 건수
-      </div>
-      <div className="text-[30px] font-bold text-sky-600 pl-[24px]">35개</div>
-      {/* 최근 기간에 따른 파손 유형 갯수 파악 */}
-      <div className="flex justify-between items-center gap-2 text-[15px] font-[600] border-b border-gray-200 pb-2 px-[24px] mt-[30px]">
-        <span className="border-b-2 text-blue-500 border-blue-500">
-          최근 1개월
-        </span>
-        <span>최근 3개월</span>
-        <span>최근 1년</span>
-        <span>전체 기간</span>
+
+      <div className="m-[24px]">
+        {/* CCTV 실시간 탐지 결과 섹션*/}
+        <div className="text-[20px] font-[700]">실시간 탐지 결과</div>
+        <div className="text-[16px] text-sky-500 font-[700] mt-[30px]">
+          최근 도로 파손 유형 및 평균 건수
+        </div>
+        <div className="text-[25px] font-[700] text-sky-600">35개</div>
+        {/* 최근 기간에 따른 파손 유형 갯수 파악 */}
+        <div className="flex justify-between items-center gap-2 text-[16px] font-[500] border-b border-gray-200 mt-[30px]">
+          <span className="border-b-2 text-blue-500 border-blue-500">
+            최근 1개월
+          </span>
+          <span>최근 3개월</span>
+          <span>최근 1년</span>
+          <span>전체 기간</span>
+        </div>
+        {/* 차트 부분 */}
+        <div className="h-[220px] mt-[24px] bg-yellow-50 rounded flex items-center justify-center text-gray-500 shrink-0">
+          파이 차트 영역
+        </div>
       </div>
 
-      {/* 차트 부분 */}
-      <div className="w-full h-[220px] bg-yellow-50 rounded flex items-center justify-center text-gray-500 shrink-0">
-        파이 차트 영역
+      <div className="border-[5px] border-gray-200"></div>
+
+      <div className="m-[24px]">
+        {/* 최근 탐지 결과 확인 파트 */}
+        <div className="text-[20px] font-[700] mb-[24px]">
+          최근 탐지 결과 확인
+        </div>
+        <div className="flex gap-[60px] text-[16px] font-[600]">
+          <span>탐지 일자</span>
+          <span>탐지 유형</span>
+          <span>파손 갯수</span>
+        </div>
+        <div className="text-[16px] pt-2">
+          <div className="flex gap-[65px] text-[12px] font-[500]">
+            <span>2025.07.10</span>
+            <span>포트홀</span>
+            <div className="pl-[35px]">
+              <span>3건</span>
+            </div>
+          </div>
+          <div className="border border-gray-200 my-[10px]"></div>
+          <div className="flex gap-[65px] text-[12px] font-[500]">
+            <span>2025.07.10</span>
+            <span>포트홀</span>
+            <div className="pl-[35px]">
+              <span>3건</span>
+            </div>
+          </div>
+          <div className="border border-gray-200 my-[10px]"></div>
+          <div className="flex gap-[65px] text-[12px] font-[500]">
+            <span>2025.07.10</span>
+            <span>포트홀</span>
+            <div className="pl-[35px]">
+              <span>3건</span>
+            </div>
+          </div>
+          <div className="border border-gray-200 my-[10px]"></div>
+          <div className="flex gap-[65px] text-[12px] font-[500]">
+            <span>2025.07.10</span>
+            <span>포트홀</span>
+            <div className="pl-[35px]">
+              <span>3건</span>
+            </div>
+          </div>
+          <div className="border border-gray-200 my-[10px]"></div>
+        </div>
       </div>
 
-      {/* 최근 탐지 결과 확인 파트 */}
-      <div className="text-[10px] font-[600] my-[15px] pl-[24px] text-gray-400">
-        최근 탐지 결과 확인
-      </div>
-      <div className="flex gap-[80px] text-[12px] font-[600] px-[24px] ">
-        <span>탐지 일자</span>
-        <span>탐지 유형</span>
-        <span>파손 갯수</span>
-      </div>
-      <div className="text-[15px] pt-2">
-        <div className="flex gap-[65px] px-[24px] text-[12px] font-[500]">
-          <span>2025.07.10</span>
-          <span>포트홀</span>
-          <div className="pl-[35px]">
-            <span>3건</span>
-          </div>
-        </div>
-        <div className="border border-gray-200 my-[10px]"></div>
-        <div className="flex gap-[65px] px-[24px] text-[12px] font-[500]">
-          <span>2025.07.10</span>
-          <span>포트홀</span>
-          <div className="pl-[35px]">
-            <span>3건</span>
-          </div>
-        </div>
-        <div className="border border-gray-200 my-[10px]"></div>
-        <div className="flex gap-[65px] px-[24px] text-[12px] font-[500]">
-          <span>2025.07.10</span>
-          <span>포트홀</span>
-          <div className="pl-[35px]">
-            <span>3건</span>
-          </div>
-        </div>
-        <div className="border border-gray-200 my-[10px]"></div>
-        <div className="flex gap-[65px] px-[24px] text-[12px] font-[500]">
-          <span>2025.07.10</span>
-          <span>포트홀</span>
-          <div className="pl-[35px]">
-            <span>3건</span>
-          </div>
-        </div>
-        <div className="border border-gray-200 my-[10px]"></div>
-      </div>
+      <div className="border-[5px] border-gray-200"></div>
 
       {/* 도로 위험도 평가 섹션 */}
-      <div className="text-[15px] font-[600] pl-[24px] mt-[30px]">
-        도로 위험도 평가
-      </div>
+      <div className="m-[24px]">
+        <div className="text-[20px] font-[700]">도로 위험도 평가</div>
 
-      <div className="flex justify-center my-[15px]">
-        <div className="w-[330px] h-5 bg-gray-200 rounded-full overflow-hidden shrink-0">
-          <div className="h-full bg-yellow-400 w-2/5"></div>
+        <div className="flex justify-center my-[24px]">
+          <div className="w-full h-5 bg-gray-200 rounded-full overflow-hidden shrink-0">
+            <div className="h-full bg-yellow-400 w-2/5"></div>
+          </div>
+        </div>
+
+        <div className="flex justify-between text-[16px] text-gray-600">
+          <span>안전</span>
+          <span>보통</span>
+          <span>주의</span>
+          <span>위험</span>
         </div>
       </div>
 
-      <div className="flex justify-between text-xs mt-1 text-gray-600 px-[10px]">
-        <span>안전</span>
-        <span>보통</span>
-        <span>주의</span>
-        <span>위험</span>
-      </div>
+      <div className="border-[5px] border-gray-200"></div>
 
       {/* 도로 현황 보기 */}
-      <div className="text-[15px] font-[600] mt-[30px] pl-[24px]">
-        도로 현황 보기
-      </div>
-      <div className="w-full h-[220px] mt-[15px] bg-gray-100 rounded flex items-center justify-center text-gray-500 shrink-0">
-        CCTV 영상 썸네일
+      <div className="m-[24px]">
+        <div className="text-[24px] font-[700]">도로 현황 보기</div>
+        <div className="h-[220px] mt-[24px] bg-gray-100 rounded flex items-center justify-center text-gray-500 shrink-0">
+          CCTV 영상 썸네일
+        </div>
       </div>
 
+      <div className="border-[5px] border-gray-200"></div>
+
       {/* 누적 신고 횟수 섹션 */}
-      <div className="text-sm font-bold mt-4">누적 신고 횟수</div>
-      <div className="flex justify-between text-xs items-center mt-2">
-        <div className="flex items-center gap-1">
-          <span role="img" aria-label="신고">
-            🚨
-          </span>
-          <span>한달 평균 건수</span>
+      <div className="m-[24px]">
+        <div className="text-[24px] font-[700] mb-[24px]">누적 신고 횟수</div>
+        <div className="flex justify-between text-xs items-center mb-[24px]">
+          <div className="flex items-center gap-3 text-[16px] font-[600]">
+            <img
+              className="w-[30px] h-[36px]"
+              src="src/assets/livePage/siren.png"
+              alt="사이렌"
+            />
+            <span className="">한달 평균 건수</span>
+          </div>
+          <span className="text-right font-bold text-lg">23회</span>
         </div>
-        <span className="text-right font-bold text-lg">23회</span>
-      </div>
-      <div className="flex justify-between text-xs items-center mt-2">
-        <div className="flex items-center gap-1">
-          <span role="img" aria-label="신고">
-            🚨
-          </span>
-          <span>누적 횟수</span>
+        <div className="flex justify-between text-xs items-center mb-[24px]">
+          <div className="flex items-center gap-3 text-[16px] font-[600]">
+            <img
+              className="w-[30px] h-[36px]"
+              src="src/assets/livePage/siren.png"
+              alt="사이렌"
+            />
+            <span>누적 횟수</span>
+          </div>
+          <span className="text-right font-bold text-lg">300회</span>
         </div>
-        <span className="text-right font-bold text-lg">300회</span>
       </div>
     </div>
   );
