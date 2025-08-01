@@ -9,15 +9,13 @@ export default function DetailPanel() {
         CCTV 정보 보기
       </div>
       {/* CCTV 실시간 탐지 결과 섹션*/}
-      <div className="text-[15px] font-bold pl-[24px] mt-[30px]">
+      <div className="text-[25px] font-[500] pl-[24px] mt-[30px]">
         실시간 탐지 결과
       </div>
-      <div className="text-xs text-sky-500 font-[700] pl-[24px] mt-[30px]">
+      <div className="text-[20px] text-sky-500 font-[700] pl-[24px] mt-[30px]">
         최근 도로 파손 유형 및 평균 건수
       </div>
-      <div className="text-[30px] font-bold text-sky-600 pl-[24px]">
-        35개
-      </div>
+      <div className="text-[30px] font-bold text-sky-600 pl-[24px]">35개</div>
       {/* 최근 기간에 따른 파손 유형 갯수 파악 */}
       <div className="flex justify-between items-center gap-2 text-[15px] font-[600] border-b border-gray-200 pb-2 px-[24px] mt-[30px]">
         <span className="border-b-2 text-blue-500 border-blue-500">
@@ -29,62 +27,81 @@ export default function DetailPanel() {
       </div>
 
       {/* 차트 부분 */}
-      <div className="w-full h-40 bg-yellow-50 rounded flex items-center justify-center text-gray-500">
+      <div className="w-full h-[220px] bg-yellow-50 rounded flex items-center justify-center text-gray-500 shrink-0">
         파이 차트 영역
       </div>
 
       {/* 최근 탐지 결과 확인 파트 */}
-      <div className="text-[10px] font-[600] my-[15px] pl-[24px] text-gray-400">최근 탐지 결과 확인</div>
+      <div className="text-[10px] font-[600] my-[15px] pl-[24px] text-gray-400">
+        최근 탐지 결과 확인
+      </div>
       <div className="flex gap-[80px] text-[12px] font-[600] px-[24px] ">
         <span>탐지 일자</span>
         <span>탐지 유형</span>
         <span>파손 갯수</span>
       </div>
       <div className="text-[15px] pt-2">
-        
         <div className="flex gap-[65px] px-[24px] text-[12px] font-[500]">
           <span>2025.07.10</span>
           <span>포트홀</span>
-          <div className="pl-[35px]"><span>3건</span></div>
+          <div className="pl-[35px]">
+            <span>3건</span>
+          </div>
         </div>
         <div className="border border-gray-200 my-[10px]"></div>
         <div className="flex gap-[65px] px-[24px] text-[12px] font-[500]">
           <span>2025.07.10</span>
           <span>포트홀</span>
-          <div className="pl-[35px]"><span>3건</span></div>
+          <div className="pl-[35px]">
+            <span>3건</span>
+          </div>
         </div>
         <div className="border border-gray-200 my-[10px]"></div>
         <div className="flex gap-[65px] px-[24px] text-[12px] font-[500]">
           <span>2025.07.10</span>
           <span>포트홀</span>
-          <div className="pl-[35px]"><span>3건</span></div>
+          <div className="pl-[35px]">
+            <span>3건</span>
+          </div>
         </div>
         <div className="border border-gray-200 my-[10px]"></div>
         <div className="flex gap-[65px] px-[24px] text-[12px] font-[500]">
           <span>2025.07.10</span>
           <span>포트홀</span>
-          <div className="pl-[35px]"><span>3건</span></div>
+          <div className="pl-[35px]">
+            <span>3건</span>
+          </div>
         </div>
         <div className="border border-gray-200 my-[10px]"></div>
       </div>
 
       {/* 도로 위험도 평가 섹션 */}
-      <div className="text-[15px] font-[600] pl-[24px] mt-[30px]">도로 위험도 평가</div>
-      <div className="w-full h-5 bg-gray-200 rounded-full overflow-hidden shrink-0">
-        <div className="h-full bg-yellow-400 w-2/5"></div>
+      <div className="text-[15px] font-[600] pl-[24px] mt-[30px]">
+        도로 위험도 평가
       </div>
-      <div className="flex justify-between text-xs px-1 mt-1 text-gray-600">
+
+      <div className="flex justify-center my-[15px]">
+        <div className="w-[330px] h-5 bg-gray-200 rounded-full overflow-hidden shrink-0">
+          <div className="h-full bg-yellow-400 w-2/5"></div>
+        </div>
+      </div>
+
+      <div className="flex justify-between text-xs mt-1 text-gray-600 px-[10px]">
         <span>안전</span>
         <span>보통</span>
         <span>주의</span>
         <span>위험</span>
       </div>
 
-      <div className="text-sm font-bold mt-4">도로 현황 보기</div>
-      <div className="w-full h-28 bg-gray-100 rounded flex items-center justify-center text-gray-500">
+      {/* 도로 현황 보기 */}
+      <div className="text-[15px] font-[600] mt-[30px] pl-[24px]">
+        도로 현황 보기
+      </div>
+      <div className="w-full h-[220px] mt-[15px] bg-gray-100 rounded flex items-center justify-center text-gray-500 shrink-0">
         CCTV 영상 썸네일
       </div>
 
+      {/* 누적 신고 횟수 섹션 */}
       <div className="text-sm font-bold mt-4">누적 신고 횟수</div>
       <div className="flex justify-between text-xs items-center mt-2">
         <div className="flex items-center gap-1">
