@@ -7,9 +7,11 @@ import DetailPanel from "../../components/CCTVLive/DetailPanel";
 export default function LivePage() {
   return (
     <>
-      <Banner />
+      <div className="flex w-full">
+        <Banner />
+        <RoadInsightPanel />
+      </div>
       <MapPage />
-      <RoadInsightPanel />
       <DetailPanel />
     </>
   );

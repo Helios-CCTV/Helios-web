@@ -3,9 +3,9 @@ import React from "react";
 export default function DetailPanel() {
   return (
     // 전체 div 부분
-    <div className="right-0 absolute w-[348px] h-[650px] mr-[24px] mt-[79px] overflow-y-auto bg-white rounded-lg border border-gray-200 shadow-sm text-sm flex flex-col">
+    <div className="left-[315px] absolute w-[348px] h-full top-[60px] overflow-y-auto bg-white border-l border-gray-300 shadow-sm text-sm flex flex-col">
       {/* 헤더 부분 */}
-      <div className="flex items-center w-full h-[70px] pl-[24px] bg-sky-500 text-white text-[18px] font-bold rounded-t-md flex-shrink-0">
+      <div className="flex items-center w-full h-[70px] pl-[24px] bg-sky-500 text-white text-[18px] font-bold flex-shrink-0">
         CCTV 정보 보기
       </div>
 
