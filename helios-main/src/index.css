@@ -24,7 +24,7 @@
 
 body {
   font-family: "NanumSquare", sans-serif;
-  overflow: hidden;
+  overflow: scroll;
 }
 
 @import "tailwindcss";

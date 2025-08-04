@@ -14,7 +14,7 @@ export default function Banner() {
         
         <div className='flex gap-[8vw] font-[600] text-[15px] text-neutral-500 justify-center items-center'>
           <button onClick={() => navigate('/MapPage')}>cctv현황</button>
-          <button>탐지기록</button>
+          <button onClick={() => navigate('/DetectionHistory')}>탐지기록</button>
           <button>신고하기</button>
         </div>
 
