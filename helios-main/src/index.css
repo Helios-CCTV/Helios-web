@@ -22,9 +22,9 @@
   font-weight: 400;
 }
 
-
 body {
   font-family: "NanumSquare", sans-serif;
+  overflow: hidden;
 }
 
 @import "tailwindcss";
