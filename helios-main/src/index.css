@@ -22,9 +22,14 @@
   font-weight: 400;
 }
 
-
 body {
   font-family: "NanumSquare", sans-serif;
+  overflow: scroll;
 }
+
+/* html,
+body {
+  min-width: 1024px;
+} */
 
 @import "tailwindcss";
