@@ -54,7 +54,7 @@ export default function ReportPageContent() {
                 파손 유형 <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {["포트홀", "균열", "침하", "기타"].map((type) => (
+                {["포트홀", "균열", "침하", "함몰", "시공균열", "거북등", "쇼빙", "기타"].map((type) => (
                   <button
                     key={type}
                     type="button"
@@ -113,13 +113,13 @@ export default function ReportPageContent() {
                     value: "medium",
                     label: "보통",
                     color: "yellow",
-                    desc: "중간 크기 포트홀",
+                    desc: "피해가 발생할 수 있는 크기",
                   },
                   {
                     value: "high",
                     label: "심각",
                     color: "red",
-                    desc: "큰 포트홀, 통행 위험",
+                    desc: "사고가 발생할 수 있는 크기",
                   },
                 ].map((severity) => (
                   <button
@@ -240,7 +240,7 @@ export default function ReportPageContent() {
             <div className="text-2xl mb-3">⚡</div>
             <h3 className="font-semibold text-gray-800 mb-2">빠른 처리</h3>
             <p className="text-sm text-gray-600">
-              신고 접수 후 24시간 이내 검토 및 처리 계획을 안내드립니다
+              신고 접수 후 검토 및 처리를 진행합니다.
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">

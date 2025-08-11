@@ -90,9 +90,8 @@ export default function ReportService() {
 
                   <div className="text-sm text-gray-600 leading-relaxed">
                     <div>파손 도로의 위치와 시간, 파손 정도를</div>
-                    <div>알려주세요. 정확할수록 더 빠르게 처리</div>
                     <div className="text-green-600 font-[600]">
-                      할 수 있어요.
+                      알려주면 더 빠르게 처리 할 수 있어요.
                     </div>
                   </div>
                 </div>
@@ -115,9 +114,9 @@ export default function ReportService() {
 
                   <div className="text-sm text-gray-600 leading-relaxed">
                     <div>신고 내용을 확인 후 연락드릴게요.</div>
-                    <div>접수된 내용과 확인 결과, 향후 진행에</div>
+                    <div>접수된 내용을 자세히 검토한 후</div>
                     <div className="text-purple-600 font-[600]">
-                      대해 자세히 알려드릴게요.
+                      향후 진행에 대해 자세히 알려드릴게요.
                     </div>
                   </div>
                 </div>

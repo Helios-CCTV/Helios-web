@@ -1,7 +1,10 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 // 슬로건, 메인 배너 이미지에 대한 컴포넌트
 export default function Slogan() {
+  const navigate = useNavigate();
+
   return (
     <>
       {/* 전체 div */}
@@ -37,10 +40,20 @@ export default function Slogan() {
 
           {/* CTA 버튼 추가 */}
           <div className="mt-12 flex gap-4 justify-center">
-            <button className="bg-blue-500 hover:bg-blue-600 text-white font-[700] px-8 py-4 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-xl">
+            <button
+              className="bg-blue-500 hover:bg-blue-600 text-white font-[700] px-8 py-4 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-xl"
+              onClick={() => {
+                navigate("/MapPage");
+              }}
+            >
               CCTV 현황 보기
             </button>
-            <button className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-[700] px-8 py-4 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-xl border border-white/30">
+            <button
+              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-[700] px-8 py-4 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-xl border border-white/30"
+              onClick={() => {
+                navigate("/ReportPage");
+              }}
+            >
               도로 신고하기
             </button>
           </div>

@@ -20,6 +20,6 @@ export default function MapPage() {
   }, []);
 
   return (
-    <div id="map" className='h-[100vh] w-[100vw] fixed'></div>
+    <div id="map" className='fixed h-[100vh] w-[100vw]'></div>
   )
 }
