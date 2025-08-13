@@ -5,7 +5,10 @@ import DetailPanel from "./DetailPanel";
 
 // 현재 선택된 상태 필터(전체/위험/주의/안전)
 // 검색어(실시간 입력값)
-export default function RoadInsightPanel() {
+
+type Props = { cctvData: CCTVData[] };
+
+export default function RoadInsightPanel({ cctvData }: Props) {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -245,7 +248,7 @@ export default function RoadInsightPanel() {
           <div className="px-4 py-2">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-gray-600">
-                총 {filteredRoads.length}개 도로
+                총 {cctvData.length}개 도로
               </span>
               <span className="text-xs text-gray-400">
                 마지막 업데이트: 방금 전

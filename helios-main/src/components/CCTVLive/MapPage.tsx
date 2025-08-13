@@ -33,12 +33,17 @@ interface KakaoBounds {
   };
 }
 
+type MapPageProps = {
+  onBoundsChange?: (bounds: BoundingBox) => void; // 지도 영역 변경
+  onData?: (data: CCTVData[]) => void; // CCTV 데이터 변경
+};
+
 /**
  * MapPage 컴포넌트
  * 카카오맵을 표시하고 CCTV 마커를 동적으로 로드하는 페이지
  * React Query를 사용하여 효율적인 데이터 관리
  */
-export default function MapPage() {
+export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
   // 카카오맵 인스턴스 참조
   const mapRef = useRef<any>(null);
 
@@ -70,6 +75,11 @@ export default function MapPage() {
     staleTime: 1000 * 60 * 2, // 2분간 캐시 유효
     gcTime: 1000 * 60 * 5, // 5분간 캐시 버리지 않음
   });
+
+  useEffect(() => {
+    // 부모(LivePage)로 최신 CCTV 데이터를 전달하여 다른 패널에서도 사용할 수 있게 함
+    onData?.(cctvData);
+  }, [cctvData, onData]);
 
   /**
    * 카카오맵 bounds를 BoundingBox 형태로 변환하는 함수
@@ -184,7 +194,7 @@ export default function MapPage() {
               text-overflow: ellipsis;
               position: relative;
             ">
-              <div style="display: flex; align-items: center; gap: 6px;">
+              <div style="display: flex; justify-content: center; align-items: center; gap: 6px;">
                 <span style="font-size: 16px;">📹</span>
                 <span>${cctv.cctvname}</span>
               </div>
@@ -253,8 +263,9 @@ export default function MapPage() {
       const boundingBox = convertBounds(bounds);
       console.log("🗺️ 지도 영역 변경:", boundingBox);
       setCurrentBounds(boundingBox);
+      onBoundsChange?.(boundingBox); // 부모 컴포넌트에 변경된 영역 전달
     },
-    [convertBounds]
+    [convertBounds, onBoundsChange]
   );
 
   // CCTV 데이터가 변경될 때마다 마커 업데이트
@@ -319,7 +330,7 @@ export default function MapPage() {
         boundsChangedTimeout = window.setTimeout(() => {
           const bounds = map.getBounds(); // 변경된 지도 영역 가져오기
           handleBoundsChanged(bounds); // 새 영역의 CCTV 데이터 로드
-        }, 1000); // 디바운싱 시간을 1초로 늘림
+        }, 500); // 디바운싱 시간을 500ms로 설정
       });
 
       // 컴포넌트 언마운트 시 정리 작업

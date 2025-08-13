@@ -3,15 +3,24 @@ import Banner from "../../components/Banner/Banner";
 import MapPage from "../../components/CCTVLive/MapPage";
 import RoadInsightPanel from "../../components/CCTVLive/RoadInsightPanel";
 
+import { useState, useCallback } from "react";
+import type { CCTVData, BoundingBox } from "../../API/cctvAPI";
+
 export default function LivePage() {
+  const [cctvData, setCctvData] = useState<CCTVData[]>([]);
+
+  const handleBoundsChange = useCallback((bounds: BoundingBox) => {}, []);
+
   return (
     <>
       <div className="flex w-full">
         <Banner />
-        <RoadInsightPanel />
+        <RoadInsightPanel cctvData={cctvData} />
       </div>
-      <MapPage />
-      {/* <DetailPanel /> */}
+      <MapPage
+        onBoundsChange={handleBoundsChange}
+        onData={(data) => setCctvData(data)}
+      />
     </>
   );
 }
