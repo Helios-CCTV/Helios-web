@@ -1,17 +1,19 @@
 import { useState } from "react";
+import type { CCTVData } from "../../API/cctvAPI";
 
 interface DetailPanelProps {
   selectedRoad: {
     id: number;
     name: string;
     location: string;
-    status: string;
-    statusColor: string;
+    status: "위험" | "주의" | "안전";
+    statusColor: "red" | "yellow" | "green";
     damageTypes: string[];
     damageCount: number;
     lastDetected: string;
     cctvCount: number;
     distance: string;
+    cctvData: CCTVData; // 원본 CCTV 데이터 참조
   };
   onClose: () => void;
 }
@@ -47,7 +49,7 @@ export default function DetailPanel({
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <h2 className="text-xl font-bold mb-1">CCTV 상세정보</h2>
-            <p className="text-blue-100 text-sm">{selectedRoad.name}</p>
+            <p className="text-blue-100 text-sm">{selectedRoad.location}</p>
           </div>
 
           {/* 닫기 버튼 */}

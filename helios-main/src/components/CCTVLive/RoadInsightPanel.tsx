@@ -1,80 +1,92 @@
 // RoadInsightPanel: 좌측 사이드 패널에서 도로 목록을 필터/검색하고,
 // 항목을 클릭하면 우측의 DetailPanel을 열어 상세 정보를 보여주는 컴포넌트
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import DetailPanel from "./DetailPanel";
+import type { CCTVData } from "../../API/cctvAPI";
 
 // 현재 선택된 상태 필터(전체/위험/주의/안전)
 // 검색어(실시간 입력값)
 
 type Props = { cctvData: CCTVData[] };
 
+// CCTV 데이터를 기반으로 한 도로 정보 타입
+interface RoadInfo {
+  id: number;
+  name: string;
+  location: string;
+  status: "위험" | "주의" | "안전";
+  statusColor: "red" | "yellow" | "green";
+  damageTypes: string[];
+  damageCount: number;
+  lastDetected: string;
+  cctvCount: number;
+  distance: string;
+  cctvData: CCTVData; // 원본 CCTV 데이터 참조
+}
+
 export default function RoadInsightPanel({ cctvData }: Props) {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // 데모용 더미 데이터: 실제 서비스에서는 서버/DB/지도 API로부터 받아오는 목록
-  // 각 도로는 상태, 파손 정보, CCTV 개수 등 메타데이터를 가짐
-  const roadData = [
-    {
-      id: 1,
-      name: "영동 고속도로",
-      location: "강남구 → 용인시",
-      status: "위험",
-      statusColor: "red",
-      damageTypes: ["포트홀", "균열"],
-      damageCount: 7,
-      lastDetected: "방금 전",
-      cctvCount: 3,
-      distance: "2.1km",
-    },
-    {
-      id: 2,
-      name: "경부 고속도로",
-      location: "서초구 → 성남시",
-      status: "주의",
-      statusColor: "yellow",
-      damageTypes: ["침하", "균열"],
-      damageCount: 3,
-      lastDetected: "5분 전",
-      cctvCount: 2,
-      distance: "1.8km",
-    },
-    {
-      id: 3,
-      name: "강남대로",
-      location: "강남구 역삼동",
-      status: "안전",
-      statusColor: "green",
-      damageTypes: [],
-      damageCount: 0,
-      lastDetected: "1시간 전",
-      cctvCount: 5,
-      distance: "0.5km",
-    },
-    {
-      id: 4,
-      name: "테헤란로",
-      location: "강남구 삼성동",
-      status: "주의",
-      statusColor: "yellow",
-      damageTypes: ["균열"],
-      damageCount: 2,
-      lastDetected: "10분 전",
-      cctvCount: 4,
-      distance: "1.2km",
-    },
-  ];
+  // cctvData를 기반으로 도로 정보 생성
+  // 각 CCTV의 cctvname을 도로명으로 사용하고, 임의로 상태를 부여
+  const roadData = useMemo((): RoadInfo[] => {
+    return cctvData.map((cctv, index) => {
+      // CCTV 이름에서 대괄호 안의 내용 추출 (예: "[국도1호선] 파주 봉일천4리" -> "국도1호선")
+      const roadMatch = cctv.cctvname.match(/\[(.*?)\]/);
+      const roadType = roadMatch ? roadMatch[1] : "일반도로";
+
+      // 지역명 추출 (CCTV 이름에서 마지막 부분)
+      const locationParts = cctv.cctvname.replace(/\[.*?\]\s*/, "").trim();
+
+      // 인덱스 기반으로 임시 상태 할당 (실제로는 서버에서 받아온 데이터 사용)
+      const statusOptions: Array<{
+        status: "위험" | "주의" | "안전";
+        color: "red" | "yellow" | "green";
+      }> = [
+        { status: "안전", color: "green" },
+        { status: "주의", color: "yellow" },
+        { status: "위험", color: "red" },
+      ];
+      const statusInfo = statusOptions[index % 3];
+
+      // 상태에 따른 가상의 손상 정보 생성
+      let damageTypes: string[] = [];
+      let damageCount = 0;
+
+      if (statusInfo.status === "위험") {
+        damageTypes = ["포트홀", "균열"];
+        damageCount = Math.floor(Math.random() * 5) + 3; // 3-7개
+      } else if (statusInfo.status === "주의") {
+        damageTypes = ["균열"];
+        damageCount = Math.floor(Math.random() * 3) + 1; // 1-3개
+      }
+
+      return {
+        id: index + 1,
+        name: roadType, locationParts,
+        location: locationParts,
+        status: statusInfo.status,
+        statusColor: statusInfo.color,
+        damageTypes,
+        damageCount,
+        lastDetected:
+          index < 2 ? "방금 전" : `${Math.floor(Math.random() * 30) + 1}분 전`,
+        cctvCount: 1, // 현재는 CCTV 1대당 1개 도로로 표시
+        distance: `${(Math.random() * 3 + 0.5).toFixed(1)}km`,
+        cctvData: cctv,
+      };
+    });
+  }, [cctvData]);
 
   // 사용자가 클릭한 도로 정보를 보관하는 상태
   // 상세 패널(DetailPanel) 열림/닫힘 상태
-  const [selectedRoad, setSelectedRoad] = useState<(typeof roadData)[0] | null>(
-    null
-  ); // 선택된 도로 정보
-  const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false); // DetailPanel 표시 상태
+  const [selectedRoad, setSelectedRoad] = useState<RoadInfo | null>(null);
+  const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
 
   // 목록 아이템 클릭 시: 해당 도로를 선택하고 상세 패널을 연다
-  const handleRoadClick = (road: (typeof roadData)[0]) => {
-    setSelectedRoad(road);
+  const handleRoadClick = (roadData: RoadInfo) => {
+    setSelectedRoad(roadData);
     setIsDetailPanelOpen(true);
   };
 
@@ -95,9 +107,9 @@ export default function RoadInsightPanel({ cctvData }: Props) {
       (selectedFilter === "warning" && road.status === "주의") ||
       (selectedFilter === "safe" && road.status === "안전");
 
-    const matchesSearch = road.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+    const matchesSearch =
+      road.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      road.location.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesFilter && matchesSearch;
   });
@@ -248,7 +260,7 @@ export default function RoadInsightPanel({ cctvData }: Props) {
           <div className="px-4 py-2">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-gray-600">
-                총 {cctvData.length}개 도로
+                총 {filteredRoads.length}개 도로
               </span>
               <span className="text-xs text-gray-400">
                 마지막 업데이트: 방금 전
@@ -323,7 +335,11 @@ export default function RoadInsightPanel({ cctvData }: Props) {
             {filteredRoads.length === 0 && (
               <div className="text-center py-8">
                 <div className="text-4xl mb-2">🔍</div>
-                <p className="text-gray-500 text-sm">검색 결과가 없습니다</p>
+                <p className="text-gray-500 text-sm">
+                  {cctvData.length === 0
+                    ? "현재 지도 영역에 CCTV가 없습니다"
+                    : "검색 결과가 없습니다"}
+                </p>
               </div>
             )}
           </div>
