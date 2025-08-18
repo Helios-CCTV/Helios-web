@@ -13,59 +13,7 @@ import axios from "axios";
  */
 const CCTV_API_BASE_URL = import.meta.env.VITE_CCTV_API_URL;
 
-/**
- * axios 인스턴스 생성
- * 기본 설정과 인터셉터를 적용
- */
-const apiClient = axios.create({
-  baseURL: CCTV_API_BASE_URL,
-  timeout: 10000, // 10초 타임아웃
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-/**
- * 요청 인터셉터 - API 호출 전 로깅
- */
-apiClient.interceptors.request.use(
-  (config) => {
-    console.log(
-      `🔄 CCTV API 요청: ${config.method?.toUpperCase()} ${config.url}`
-    );
-    return config;
-  },
-  (error) => {
-    console.error("❌ API 요청 설정 오류:", error);
-    return Promise.reject(error);
-  }
-);
-
-/**
- * 응답 인터셉터 - API 응답 후 로깅 및 에러 처리
- */
-apiClient.interceptors.response.use(
-  (response) => {
-    console.log(`✅ CCTV API 응답: ${response.status}`, response.data);
-    return response;
-  },
-  (error) => {
-    if (error.response) {
-      // 서버가 응답했지만 오류 상태 코드
-      console.error(
-        `❌ API 서버 오류: ${error.response.status}`,
-        error.response.data
-      );
-    } else if (error.request) {
-      // 요청이 전송되었지만 응답을 받지 못함
-      console.error("❌ API 서버 무응답:", error.request);
-    } else {
-      // 요청 설정 중 오류 발생
-      console.error("❌ API 요청 설정 오류:", error.message);
-    }
-    return Promise.reject(error);
-  }
-);
+// 인터페이스 정의
 
 /**
  * CCTV 데이터 응답 인터페이스 정의
@@ -103,6 +51,64 @@ export interface BoundingBox {
 }
 
 /**
+ * axios 인스턴스 생성
+ * 기본 설정과 인터셉터를 적용
+ */
+const apiClient = axios.create({
+  baseURL: CCTV_API_BASE_URL,
+  timeout: 10000, // 10초 타임아웃
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+/**
+ * 요청을 보낼 때 먼저 수행되는 파트
+ * config가 우선적으로 사용되며 에러가 발생했을 경우 error를 실행
+ * 인터셉트하는거임 ㅇㅇ
+ */
+apiClient.interceptors.request.use(
+  (config) => {
+    console.log(
+      `🔄 CCTV API 요청: ${config.method?.toUpperCase()} ${config.url}`
+    );
+    return config;
+  },
+  (error) => {
+    console.error("❌ API 요청 설정 오류:", error);
+    return Promise.reject(error);
+  }
+);
+
+/**
+ * 응답 받았을 때 실행되는 파트
+ * 응답이 제대로 왔을 경우 response의 status와 data를 console에 찍음
+ * 서버가 응답했는데 오류를 뱉을 경우 아래 오류를 실행
+ */
+apiClient.interceptors.response.use(
+  (response) => {
+    console.log(`✅ CCTV API 응답: ${response.status}`, response.data);
+    return response;
+  },
+  (error) => {
+    if (error.response) {
+      // 서버가 응답했지만 오류 상태 코드
+      console.error(
+        `❌ API 서버 오류: ${error.response.status}`,
+        error.response.data
+      );
+    } else if (error.request) {
+      // 요청이 전송되었지만 응답을 받지 못함
+      console.error("❌ API 서버 무응답:", error.request);
+    } else {
+      // 요청 설정 중 오류 발생
+      console.error("❌ API 요청 설정 오류:", error.message);
+    }
+    return Promise.reject(error);
+  }
+);
+
+/**
  * 지도 영역 내의 CCTV 데이터를 가져오는 함수 (axios 사용)
  * React Query와 함께 사용하기 위해 Promise를 반환
  * @param bounds - 지도 경계 좌표 객체
@@ -117,6 +123,7 @@ export const fetchCCTVDataByBounds = async (
 
     // axios를 사용하여 GET 요청
     const response = await apiClient.get<APIResponse>("/cctv/view", {
+      // 파라미터 로깅, 요청할 bounds를 minX 부터 maxX, minY부터 maxY
       params: {
         minX: bounds.minX,
         maxX: bounds.maxX,
@@ -126,6 +133,7 @@ export const fetchCCTVDataByBounds = async (
     });
 
     // API 응답 데이터 검증
+    // 응답이 없을 경우 뱉음
     if (!response.data.success) {
       throw new Error(
         `API 오류: ${response.data.message || "알 수 없는 오류"}`
@@ -133,14 +141,17 @@ export const fetchCCTVDataByBounds = async (
     }
 
     // CCTV 데이터가 있는지 확인
+    // 데이터가 없으면 빈 Array를 뱉음
     if (!response.data.data || !Array.isArray(response.data.data)) {
       return [];
     }
 
+    // data를 cctvData에 삽입
     const cctvData = response.data.data;
     console.log(`📹 CCTV 데이터 ${cctvData.length}개 로드 완료`);
 
     // 좌표 유효성 검사
+    // 좌표가 유효한지 검사하는거임
     const validCCTVData = cctvData.filter((cctv) => {
       const hasValidCoords =
         cctv.coordx &&
@@ -154,6 +165,7 @@ export const fetchCCTVDataByBounds = async (
     });
 
     console.log(`✅ 유효한 CCTV 데이터 ${validCCTVData.length}개`);
+
     return validCCTVData;
   } catch (error) {
     console.error("💥 CCTV 데이터 로딩 실패:", error);
@@ -168,6 +180,7 @@ export const fetchCCTVDataByBounds = async (
  * @param bounds - 지도 경계 좌표
  * @returns React Query 키 배열
  */
+// QueryKey이며 같은 경계로 다시 열람했을 경우 캐시를 재사용 ;; ㅅㅂ 뭐라는지 모르겠음
 export const getCCTVQueryKey = (bounds: BoundingBox) => {
   return ["cctv-data", bounds] as const;
 };

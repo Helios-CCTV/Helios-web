@@ -229,17 +229,17 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
 
         // 마커 클릭 이벤트 (추후 CCTV 상세보기 등에 활용 가능)
         window.kakao.maps.event.addListener(marker, "click", function () {
-          console.log("🎬 CCTV 클릭:", {
-            name: cctv.cctvname,
-            url: cctv.cctvurl,
-            coordinates: { lat, lng },
-            type: cctv.cctvtype,
-            format: cctv.cctvformat,
-          });
+          // console.log("🎬 CCTV 클릭:", {
+          //   name: cctv.cctvname,
+          //   url: cctv.cctvurl,
+          //   coordinates: { lat, lng },
+          //   type: cctv.cctvtype,
+          //   format: cctv.cctvformat,
+          // });
           // 여기에 CCTV 영상 재생이나 상세 정보 모달 표시 로직 추가 가능
         });
 
-        console.log(`✅ 마커 생성 완료: ${cctv.cctvname} (${lat}, ${lng})`);
+        // console.log(`✅ 마커 생성 완료: ${cctv.cctvname} (${lat}, ${lng})`);
       } catch (error) {
         console.error(
           `❌ 마커 생성 실패 (${index + 1}번째 CCTV):`,
@@ -249,9 +249,9 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
       }
     });
 
-    console.log(
-      `🎯 총 ${markersRef.current.length}개의 마커가 지도에 표시되었습니다.`
-    );
+    // console.log(
+    //   `🎯 총 ${markersRef.current.length}개의 마커가 지도에 표시되었습니다.`
+    // );
   }, []);
 
   /**
@@ -261,7 +261,7 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
   const handleBoundsChanged = useCallback(
     (bounds: KakaoBounds) => {
       const boundingBox = convertBounds(bounds);
-      console.log("🗺️ 지도 영역 변경:", boundingBox);
+      // console.log("🗺️ 지도 영역 변경:", boundingBox);
       setCurrentBounds(boundingBox);
       onBoundsChange?.(boundingBox); // 부모 컴포넌트에 변경된 영역 전달
     },
@@ -271,10 +271,10 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
   // CCTV 데이터가 변경될 때마다 마커 업데이트
   useEffect(() => {
     if (cctvData && cctvData.length > 0) {
-      console.log("📡 새로운 CCTV 데이터 수신:", cctvData.length);
+      // console.log("📡 새로운 CCTV 데이터 수신:", cctvData.length);
       displayMarkers(cctvData);
     } else {
-      console.log("📭 CCTV 데이터가 없습니다.");
+      // console.log("📭 CCTV 데이터가 없습니다.");
       displayMarkers([]);
     }
   }, [cctvData, displayMarkers]);
