@@ -1,29 +1,49 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import Hls from "hls.js";
 import type { CCTVData } from "../../API/cctvAPI";
 
 interface DetailPanelProps {
-  selectedRoad: {
-    id: number;
-    name: string;
-    location: string;
-    status: "위험" | "주의" | "안전";
-    statusColor: "red" | "yellow" | "green";
-    damageTypes: string[];
-    damageCount: number;
-    lastDetected: string;
-    cctvCount: number;
-    distance: string;
-    cctvData: CCTVData; // 원본 CCTV 데이터 참조
-  };
+  selectedcctv: CCTVData;
   onClose: () => void;
 }
 
 export default function DetailPanel({
-  selectedRoad,
+  selectedcctv,
   onClose,
 }: DetailPanelProps) {
   const [selectedPeriod, setSelectedPeriod] = useState("1month");
   const [isExpanded, setIsExpanded] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // CCTV 데이터를 기반으로 가상의 도로 파손 정보 생성
+  const damageCount = Math.floor(Math.random() * 10) + 1;
+  const damageTypes = ["포트홀", "균열", "침하"];
+
+  // HLS 영상 초기화
+  useEffect(() => {
+    const loadHLS = async () => {
+      if (
+        selectedcctv.cctvformat === "HLS" &&
+        selectedcctv.cctvurl &&
+        videoRef.current
+      ) {
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(selectedcctv.cctvurl);
+          hls.attachMedia(videoRef.current);
+        } else if (
+          videoRef.current.canPlayType("application/vnd.apple.mpegurl")
+        ) {
+          // Safari에서 네이티브 HLS 지원
+          videoRef.current.src = selectedcctv.cctvurl;
+        } else {
+          console.error("HLS가 지원되지 않는 브라우저입니다.");
+        }
+      }
+    };
+
+    loadHLS();
+  }, [selectedcctv.cctvurl, selectedcctv.cctvformat]);
 
   const detectionHistory = [
     { date: "2025.08.06", type: "포트홀", count: 5, severity: "위험" },
@@ -49,7 +69,7 @@ export default function DetailPanel({
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <h2 className="text-xl font-bold mb-1">CCTV 상세정보</h2>
-            <p className="text-blue-100 text-sm">{selectedRoad.location}</p>
+            <p className="text-blue-100 text-sm">{selectedcctv.cctvname}</p>
           </div>
 
           {/* 닫기 버튼 */}
@@ -82,16 +102,12 @@ export default function DetailPanel({
             <h3 className="text-lg font-bold text-gray-800">
               실시간 탐지 결과
             </h3>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-gray-600">Live</span>
-            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-orange-600">
-                {selectedRoad.damageCount}
+                {damageCount}
               </div>
               <div className="text-xs text-gray-600">이번 달 탐지</div>
             </div>
@@ -138,10 +154,10 @@ export default function DetailPanel({
           <div className="h-40 flex items-center justify-center">
             <div className="text-center">
               <div className="w-24 h-24 mx-auto mb-3 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold text-lg">
-                {selectedRoad.damageCount}건
+                {damageCount}건
               </div>
               <div className="text-xs text-gray-600">
-                {selectedRoad.damageTypes.join(" • ")}
+                {damageTypes.join(" • ")}
               </div>
             </div>
           </div>
@@ -150,7 +166,7 @@ export default function DetailPanel({
         {/* 최근 탐지 결과 */}
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-            <h3 className="font-bold text-gray-800">📋 최근 탐지 결과</h3>
+            <h3 className="font-bold text-gray-800">최근 탐지 결과</h3>
           </div>
 
           <div className="p-4">
@@ -254,28 +270,44 @@ export default function DetailPanel({
           </div>
 
           <div className="p-4">
-            <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center mb-3">
-              <div className="text-center">
-                <div className="text-3xl mb-2">📹</div>
-                <div className="text-sm text-gray-600">
-                  CCTV 실시간 스트리밍
+            <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden mb-3">
+              {selectedcctv.cctvformat === "HLS" && selectedcctv.cctvurl ? (
+                <video
+                  ref={videoRef}
+                  className="w-full h-full object-cover"
+                  controls
+                  autoPlay
+                  muted
+                  playsInline
+                  onError={(e) => {
+                    console.error("비디오 재생 오류:", e);
+                  }}
+                >
+                  브라우저가 비디오 재생을 지원하지 않습니다.
+                </video>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-sm text-gray-600 mb-2">
+                      CCTV 영상을 불러올 수 없습니다
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {selectedcctv.cctvformat} 형식 지원 필요
+                    </div>
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {selectedRoad.location}
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* 신고 통계 */}
         <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <h3 className="font-bold text-gray-800 mb-4">📊 신고 통계</h3>
+          <h3 className="font-bold text-gray-800 mb-4">신고 통계</h3>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-blue-50 rounded-lg p-4 text-center border border-blue-200">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="text-lg">🚨</span>
                 <span className="text-sm font-semibold text-blue-800">
                   월간 평균
                 </span>
@@ -285,7 +317,6 @@ export default function DetailPanel({
 
             <div className="bg-red-50 rounded-lg p-4 text-center border border-red-200">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="text-lg">📈</span>
                 <span className="text-sm font-semibold text-red-800">
                   총 누적
                 </span>

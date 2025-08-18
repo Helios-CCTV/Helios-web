@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import DetailPanel from "./DetailPanel";
+
 import {
   fetchCCTVDataByBounds,
   getCCTVQueryKey,
@@ -10,7 +12,6 @@ import {
 
 /**
  * 카카오맵 전역 객체 타입 선언
- * window.kakao가 존재함을 TypeScript에게 알림
  */
 declare global {
   interface Window {
@@ -55,6 +56,19 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
 
   // 현재 지도 영역의 경계 좌표 상태
   const [currentBounds, setCurrentBounds] = useState<BoundingBox | null>(null);
+
+  const [selectedCCTV, setSelectedCCTV] = useState<CCTVData | null>(null);
+  const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
+
+  const handleRoadClick = (cctvData: CCTVData) => {
+    setSelectedCCTV(cctvData);
+    setIsDetailPanelOpen(true);
+  };
+
+  const handleCloseDetailPanel = () => {
+    setIsDetailPanelOpen(false);
+    setSelectedCCTV(null);
+  };
 
   // React Query를 사용한 CCTV 데이터 패칭
   // currentBounds가 변경될 때마다 자동으로 새로운 데이터를 가져옴
@@ -229,14 +243,14 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
 
         // 마커 클릭 이벤트 (추후 CCTV 상세보기 등에 활용 가능)
         window.kakao.maps.event.addListener(marker, "click", function () {
-          // console.log("🎬 CCTV 클릭:", {
-          //   name: cctv.cctvname,
-          //   url: cctv.cctvurl,
-          //   coordinates: { lat, lng },
-          //   type: cctv.cctvtype,
-          //   format: cctv.cctvformat,
-          // });
-          // 여기에 CCTV 영상 재생이나 상세 정보 모달 표시 로직 추가 가능
+          console.log("🎬 CCTV 클릭:", {
+            name: cctv.cctvname,
+            url: cctv.cctvurl,
+            coordinates: { lat, lng },
+            type: cctv.cctvtype,
+            format: cctv.cctvformat,
+          });
+          handleRoadClick(cctv);
         });
 
         // console.log(`✅ 마커 생성 완료: ${cctv.cctvname} (${lat}, ${lng})`);
@@ -248,10 +262,6 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
         );
       }
     });
-
-    // console.log(
-    //   `🎯 총 ${markersRef.current.length}개의 마커가 지도에 표시되었습니다.`
-    // );
   }, []);
 
   /**
@@ -293,8 +303,6 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
   useEffect(() => {
     // 카카오맵 API가 로드되었는지 확인
     if (window.kakao && window.kakao.maps) {
-      console.log("🗺️ 카카오맵 API 로드 완료, 지도 초기화 시작");
-
       // 지도를 표시할 HTML 요소 가져오기
       const mapContainer = document.getElementById("map");
       if (!mapContainer) {
@@ -304,8 +312,8 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
 
       // 지도 초기 옵션 설정
       const mapOption = {
-        center: new window.kakao.maps.LatLng(37.5665, 126.978), // 서울 강남역 근처 좌표
-        level: 5, // 지도 확대 레벨 (1~14, 숫자가 작을수록 더 확대)
+        center: new window.kakao.maps.LatLng(37.35, 127.1324), // 서울 강남역 근처 좌표
+        level: 9, // 지도 확대 레벨 (1~14, 숫자가 작을수록 더 확대)
       };
 
       // 카카오맵 인스턴스 생성 및 ref에 저장
@@ -326,7 +334,7 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
         // 디바운싱 처리: 지도 이동/확대가 빈번할 때 API 호출을 제한
         clearTimeout(boundsChangedTimeout);
 
-        // 1초 후에 API 호출 (사용자가 지도 조작을 멈췄을 때)
+        // 0.5초 후에 API 호출 (사용자가 지도 조작을 멈췄을 때)
         boundsChangedTimeout = window.setTimeout(() => {
           const bounds = map.getBounds(); // 변경된 지도 영역 가져오기
           handleBoundsChanged(bounds); // 새 영역의 CCTV 데이터 로드
@@ -404,6 +412,16 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
         <div className="absolute top-30 right-4 z-10 bg-gray-800 text-white rounded-lg shadow-lg px-3 py-2 text-xs opacity-75">
           API: {import.meta.env.VITE_CCTV_API_URL}
         </div>
+      )}
+
+      {/* DetailPanel, 마커 클릭시 정보 제공과 동시에 표시됨 */}
+      {isDetailPanelOpen && selectedCCTV && (
+        <>
+          <DetailPanel
+            selectedcctv={selectedCCTV}
+            onClose={handleCloseDetailPanel}
+          />
+        </>
       )}
     </div>
   );

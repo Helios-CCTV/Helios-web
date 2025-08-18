@@ -35,25 +35,22 @@ export default function RoadInsightPanel({ cctvData }: Props) {
       // CCTV 이름에서 대괄호 안의 내용 추출 (예: "[국도1호선] 파주 봉일천4리" -> "국도1호선")
       const roadMatch = cctv.cctvname.match(/\[(.*?)\]/);
       const roadType = roadMatch ? roadMatch[1] : "일반도로";
-
+      
       // 지역명 추출 (CCTV 이름에서 마지막 부분)
-      const locationParts = cctv.cctvname.replace(/\[.*?\]\s*/, "").trim();
-
+      const locationParts = cctv.cctvname.replace(/\[.*?\]\s*/, '').trim();
+      
       // 인덱스 기반으로 임시 상태 할당 (실제로는 서버에서 받아온 데이터 사용)
-      const statusOptions: Array<{
-        status: "위험" | "주의" | "안전";
-        color: "red" | "yellow" | "green";
-      }> = [
+      const statusOptions: Array<{status: "위험" | "주의" | "안전", color: "red" | "yellow" | "green"}> = [
         { status: "안전", color: "green" },
         { status: "주의", color: "yellow" },
-        { status: "위험", color: "red" },
+        { status: "위험", color: "red" }
       ];
       const statusInfo = statusOptions[index % 3];
-
+      
       // 상태에 따른 가상의 손상 정보 생성
       let damageTypes: string[] = [];
       let damageCount = 0;
-
+      
       if (statusInfo.status === "위험") {
         damageTypes = ["포트홀", "균열"];
         damageCount = Math.floor(Math.random() * 5) + 3; // 3-7개
@@ -64,36 +61,36 @@ export default function RoadInsightPanel({ cctvData }: Props) {
 
       return {
         id: index + 1,
-        name: roadType, locationParts,
+        name: roadType,
         location: locationParts,
         status: statusInfo.status,
         statusColor: statusInfo.color,
         damageTypes,
         damageCount,
-        lastDetected:
-          index < 2 ? "방금 전" : `${Math.floor(Math.random() * 30) + 1}분 전`,
+        lastDetected: index < 2 ? "방금 전" : `${Math.floor(Math.random() * 30) + 1}분 전`,
         cctvCount: 1, // 현재는 CCTV 1대당 1개 도로로 표시
         distance: `${(Math.random() * 3 + 0.5).toFixed(1)}km`,
-        cctvData: cctv,
+        cctvData: cctv
       };
     });
   }, [cctvData]);
 
-  // 사용자가 클릭한 도로 정보를 보관하는 상태
+  // 사용자가 클릭한 CCTV 정보를 보관하는 상태
   // 상세 패널(DetailPanel) 열림/닫힘 상태
-  const [selectedRoad, setSelectedRoad] = useState<RoadInfo | null>(null);
+  const [selectedCCTV, setSelectedCCTV] = useState<CCTVData | null>(null);
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
 
   // 목록 아이템 클릭 시: 해당 도로를 선택하고 상세 패널을 연다
-  const handleRoadClick = (roadData: RoadInfo) => {
-    setSelectedRoad(roadData);
+  const handleRoadClick = (road: RoadInfo) => {
+    // RoadInfo에서 원본 CCTVData를 추출하여 DetailPanel에 전달
+    setSelectedCCTV(road.cctvData);
     setIsDetailPanelOpen(true);
   };
 
-  // 상세 패널 닫기: 패널을 닫고 선택된 도로 상태를 초기화
+  // 상세 패널 닫기: 패널을 닫고 선택된 CCTV 상태를 초기화
   const handleCloseDetailPanel = () => {
     setIsDetailPanelOpen(false);
-    setSelectedRoad(null);
+    setSelectedCCTV(null);
   };
 
   // 화면에 표시할 목록을 계산
@@ -107,9 +104,12 @@ export default function RoadInsightPanel({ cctvData }: Props) {
       (selectedFilter === "warning" && road.status === "주의") ||
       (selectedFilter === "safe" && road.status === "안전");
 
-    const matchesSearch =
-      road.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      road.location.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = road.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase()) || 
+      road.location
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
 
     return matchesFilter && matchesSearch;
   });
@@ -336,9 +336,10 @@ export default function RoadInsightPanel({ cctvData }: Props) {
               <div className="text-center py-8">
                 <div className="text-4xl mb-2">🔍</div>
                 <p className="text-gray-500 text-sm">
-                  {cctvData.length === 0
-                    ? "현재 지도 영역에 CCTV가 없습니다"
-                    : "검색 결과가 없습니다"}
+                  {cctvData.length === 0 
+                    ? "현재 지도 영역에 CCTV가 없습니다" 
+                    : "검색 결과가 없습니다"
+                  }
                 </p>
               </div>
             )}
@@ -346,11 +347,11 @@ export default function RoadInsightPanel({ cctvData }: Props) {
         </div>
       </div>
 
-      {/* DetailPanel: 도로 선택 시에만 우측에서 오버레이로 표시됨 */}
-      {isDetailPanelOpen && selectedRoad && (
+      {/* DetailPanel: CCTV 선택 시에만 우측에서 오버레이로 표시됨 */}
+      {isDetailPanelOpen && selectedCCTV && (
         <>
           <DetailPanel
-            selectedRoad={selectedRoad}
+            selectedcctv={selectedCCTV}
             onClose={handleCloseDetailPanel}
           />
         </>
