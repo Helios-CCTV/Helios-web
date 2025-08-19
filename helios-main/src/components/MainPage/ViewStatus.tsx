@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function ViewStatus() {
   return (
     <div className="w-full h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-20 flex flex-col justify-center items-center">

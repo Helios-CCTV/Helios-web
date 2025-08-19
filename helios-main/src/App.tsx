@@ -1,5 +1,4 @@
 import { Routes, Route } from "react-router-dom";
-import { useState } from "react";
 import MainPage from "./pages/MainPage/MainPage";
 import LivePage from "./pages/CCTVLive/LivePage";
 import DetectionHistoryPage from "./pages/DetectionHistory/DetectionHistoryPage";

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 // 검색창 컴포넌트
 export default function DetectionHistorySearchBar() {
