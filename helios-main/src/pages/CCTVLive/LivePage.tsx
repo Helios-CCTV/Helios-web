@@ -1,15 +1,14 @@
-import React from "react";
 import Banner from "../../components/Banner/Banner";
 import MapPage from "../../components/CCTVLive/MapPage";
 import RoadInsightPanel from "../../components/CCTVLive/RoadInsightPanel";
 
 import { useState, useCallback } from "react";
-import type { CCTVData, BoundingBox } from "../../API/cctvAPI";
+import type { CCTVData } from "../../API/cctvAPI";
 
 export default function LivePage() {
   const [cctvData, setCctvData] = useState<CCTVData[]>([]);
 
-  const handleBoundsChange = useCallback((bounds: BoundingBox) => {}, []);
+  const handleBoundsChange = useCallback(() => {}, []);
 
   return (
     <>

@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "@types/hls.js": "^0.13.3",
-    "hls.js": "^1.6.10",
-    "tailwind-scrollbar-hide": "^4.0.0"
-  }
-}

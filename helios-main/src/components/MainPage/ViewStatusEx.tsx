@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function ViewStatusEx() {
   return (
     <>
@@ -10,7 +8,6 @@ export default function ViewStatusEx() {
         <div className="absolute top-1/2 right-20 w-16 h-16 bg-sky-100 rounded-full opacity-50"></div>
 
         <div className="text-center z-10">
-          
           {/* 메인 타이틀 */}
           <div className="mt-20 font-[900] text-5xl lg:text-6xl flex flex-col gap-2 text-gray-800 leading-tight">
             <div className="flex items-center justify-center gap-4">

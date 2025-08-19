@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 
 // 슬로건, 메인 배너 이미지에 대한 컴포넌트

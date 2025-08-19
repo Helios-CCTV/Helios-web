@@ -1,4 +1,3 @@
-import React from "react";
 import Banner from "../../components/Banner/Banner";
 import HistoryPageSlogan from "../../components/DetectionHistory/HistoryPageSlogan";
 import DetectionHistorySearchBar from "../../components/DetectionHistory/DetectionHistorySearchBar";
