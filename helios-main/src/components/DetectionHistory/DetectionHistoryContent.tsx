@@ -1,5 +1,3 @@
-import React from "react";
-
 // 더미 데이터 - 실제 API 데이터로 대체될 예정
 const detectionData = [
   {
@@ -72,7 +70,7 @@ const detectionData = [
 
 export default function DetectionHistoryContent() {
   // 심각도에 따른 상태 아이콘 및 스타일 반환
-  const getSeverityIcon = (severity: string, color: string) => {
+  const getSeverityIcon = (color: string) => {
     const icons = {
       red: "🚨",
       yellow: "⚠️",
@@ -83,12 +81,6 @@ export default function DetectionHistoryContent() {
       red: "bg-red-100",
       yellow: "bg-yellow-100",
       green: "bg-green-100",
-    };
-
-    const textColors = {
-      red: "text-red-700",
-      yellow: "text-yellow-700",
-      green: "text-green-700",
     };
 
     return (
@@ -158,7 +150,7 @@ export default function DetectionHistoryContent() {
               <div className="lg:hidden">
                 <div className="flex items-start gap-4 mb-4">
                   {/* 상태 아이콘 */}
-                  {getSeverityIcon(item.severity, item.severityColor)}
+                  {getSeverityIcon(item.severity)}
 
                   {/* 메인 정보 */}
                   <div className="flex-1">
@@ -204,7 +196,7 @@ export default function DetectionHistoryContent() {
               <div className="hidden lg:grid lg:grid-cols-6 gap-4 items-center">
                 {/* 상태 아이콘 */}
                 <div className="flex justify-center">
-                  {getSeverityIcon(item.severity, item.severityColor)}
+                  {getSeverityIcon(item.severity)}
                 </div>
 
                 {/* 위치 정보 */}

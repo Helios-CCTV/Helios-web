@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 
 // 슬로건, 메인 배너 이미지에 대한 컴포넌트
@@ -15,7 +14,7 @@ export default function Slogan() {
         {/* 배경 이미지 */}
         <img
           className="absolute w-full h-[99vh] mt-[7.3vh] object-cover"
-          src="src/assets/backgroundImage.png"
+          src="/assets/backgroundImage.png"
           alt="slogan"
         />
 

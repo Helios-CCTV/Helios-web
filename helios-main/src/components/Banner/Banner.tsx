@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Banner() {
@@ -11,7 +10,7 @@ export default function Banner() {
           <img
             className="size-[50px]"
             onClick={() => navigate("/")}
-            src="src/assets/logo.png"
+            src="/assets/logo.png"
             alt="logo"
           />
           <button

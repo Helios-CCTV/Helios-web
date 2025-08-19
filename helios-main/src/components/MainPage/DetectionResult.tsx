@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function DetectionResult() {
   return (
     <>
@@ -46,7 +44,7 @@ export default function DetectionResult() {
             <div className="absolute"></div>
             <img
               className="relative w-[550px] h-[400px] object-cover rounded-3xl shadow-2xl border-4 border-white"
-              src="src/assets/mainPage/DetectionResultImage.png"
+              src="/assets/mainPage/DetectionResultImage.png"
               alt="map"
             />
           </div>
