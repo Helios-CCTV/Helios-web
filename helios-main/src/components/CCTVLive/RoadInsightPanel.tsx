@@ -159,7 +159,7 @@ export default function RoadInsightPanel({ cctvData }: Props) {
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                 <img
                   className="w-4.5 h-5 opacity-80"
-                  src="src/assets/livePage/glasses.png"
+                  src="/assets/livePage/glasses.png"
                   alt="검색"
                 />
               </div>
@@ -218,7 +218,7 @@ export default function RoadInsightPanel({ cctvData }: Props) {
               >
                 <img
                   className="w-3 h-3"
-                  src="src/assets/livePage/danger.png"
+                  src="/assets/livePage/danger.png"
                   alt="위험"
                 />
                 위험
@@ -233,7 +233,7 @@ export default function RoadInsightPanel({ cctvData }: Props) {
               >
                 <img
                   className="w-3 h-3"
-                  src="src/assets/livePage/warning.png"
+                  src="/assets/livePage/warning.png"
                   alt="주의"
                 />
                 주의
@@ -248,7 +248,7 @@ export default function RoadInsightPanel({ cctvData }: Props) {
               >
                 <img
                   className="w-3 h-3"
-                  src="src/assets/livePage/normal.png"
+                  src="/assets/livePage/normal.png"
                   alt="안전"
                 />
                 안전

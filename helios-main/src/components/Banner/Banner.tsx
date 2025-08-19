@@ -10,7 +10,7 @@ export default function Banner() {
           <img
             className="size-[50px]"
             onClick={() => navigate("/")}
-            src="src/assets/logo.png"
+            src="/assets/logo.png"
             alt="logo"
           />
           <button

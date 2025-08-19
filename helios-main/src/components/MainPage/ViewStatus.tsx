@@ -27,7 +27,7 @@ export default function ViewStatus() {
               <div className="absolute"></div>
               <img
                 className="relative w-90 h-65 lg:w-105 lg:h-80 object-cover rounded-2xl shadow-2xl border-4 border-white"
-                src="src/assets/mainPage/mainPageMapImage.png"
+                src="/assets/mainPage/mainPageMapImage.png"
                 alt="map"
               />
             </div>
@@ -44,7 +44,7 @@ export default function ViewStatus() {
               <div className="absolute"></div>
               <img
                 className="relative w-95 h-65 lg:w-110 lg:h-72 object-cover rounded-2xl shadow-2xl border-4 border-white"
-                src="src/assets/mainPage/mainPageDangerImage.png"
+                src="/assets/mainPage/mainPageDangerImage.png"
                 alt="danger"
               />
             </div>
