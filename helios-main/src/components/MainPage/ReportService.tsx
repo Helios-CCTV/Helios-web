@@ -28,7 +28,7 @@ export default function ReportService() {
                 <div className="relative mb-6">
                   <img
                     className="w-24 h-28 mx-auto object-contain group-hover:scale-110 transition-transform duration-300"
-                    src="src/assets/mainPage/DangerSiren.png"
+                    src="/assets/mainPage/DangerSiren.png"
                     alt="Siren"
                   />
                 </div>
@@ -52,7 +52,7 @@ export default function ReportService() {
                 <div className="relative mb-6">
                   <img
                     className="w-32 h-28 mx-auto object-contain group-hover:scale-110 transition-transform duration-300"
-                    src="src/assets/mainPage/CloudUpload.png"
+                    src="/assets/mainPage/CloudUpload.png"
                     alt="CloudUpload"
                   />
                 </div>
@@ -76,7 +76,7 @@ export default function ReportService() {
                 <div className="relative mb-6">
                   <img
                     className="w-32 h-28 mx-auto object-contain group-hover:scale-110 transition-transform duration-300"
-                    src="src/assets/mainPage/Document.png"
+                    src="/assets/mainPage/Document.png"
                     alt="Document"
                   />
                 </div>
@@ -100,7 +100,7 @@ export default function ReportService() {
                 <div className="relative mb-6">
                   <img
                     className="w-28 h-28 mx-auto object-contain group-hover:scale-110 transition-transform duration-300"
-                    src="src/assets/mainPage/CheckDocument.png"
+                    src="/assets/mainPage/CheckDocument.png"
                     alt="CheckDocument"
                   />
                 </div>

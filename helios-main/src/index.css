@@ -1,24 +1,24 @@
 @font-face {
   font-family: "NanumSquare";
-  src: url("src/assets/fonts/NanumSquareOTF_acEB.otf");
+  src: url("/assets/fonts/NanumSquareOTF_acEB.otf");
   font-weight: 700;
 }
 
 @font-face {
   font-family: "NanumSquare";
-  src: url("src/assets/fonts/NanumSquareOTF_acB.otf");
+  src: url("/assets/fonts/NanumSquareOTF_acB.otf");
   font-weight: 600;
 }
 
 @font-face {
   font-family: "NanumSquare";
-  src: url("src/assets/fonts/NanumSquareOTF_acR.otf");
+  src: url("/assets/fonts/NanumSquareOTF_acR.otf");
   font-weight: 500;
 }
 
 @font-face {
   font-family: "NanumSquare";
-  src: url("src/assets/fonts/NanumSquareOTF_acL.otf");
+  src: url("/assets/fonts/NanumSquareOTF_acL.otf");
   font-weight: 400;
 }
 
