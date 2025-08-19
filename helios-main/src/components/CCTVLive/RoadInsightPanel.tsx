@@ -142,7 +142,7 @@ export default function RoadInsightPanel({ cctvData }: Props) {
         - overflow-y: auto 로 패널 내부만 스크롤되게 함
       */}
       <div
-        className="flex w-[315px] top-[60px] z-50 bg-gray-50 justify-center overflow-y-auto absolute border-r border-gray-200 shadow-sm"
+        className="hidden md:flex w-[315px] top-[60px] z-50 bg-gray-50 justify-center overflow-y-auto absolute border-r border-gray-200 shadow-sm"
         style={{
           height: "calc(100vh - 60px)",
           overflowY: "auto",
@@ -155,7 +155,7 @@ export default function RoadInsightPanel({ cctvData }: Props) {
             <h2 className="text-lg font-bold text-gray-800 mb-4">도로 현황</h2>
 
             {/* 검색바: 입력 시 setSearchQuery 로 상태가 갱신되고, 아래 filteredRoads 재계산 */}
-            <div className="relative mb-4">
+            <div className="relative mb-4 hidden md:flex">
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                 <img
                   className="w-4.5 h-5 opacity-80"
@@ -257,7 +257,7 @@ export default function RoadInsightPanel({ cctvData }: Props) {
           </div>
 
           {/* 목록 상단 정보행: 현재 필터/검색 결과의 총 개수와 업데이트 시각 */}
-          <div className="px-4 py-2">
+          <div className="px-4 py-2 hidden md:table-row">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-gray-600">
                 총 {filteredRoads.length}개 도로

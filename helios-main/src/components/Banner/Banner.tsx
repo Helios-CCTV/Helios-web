@@ -14,14 +14,14 @@ export default function Banner() {
             alt="logo"
           />
           <button
-            className="font-[700] text-[20px] flex justify-center items-center"
+            className="font-[700] sm:text-[20px] text-[15px]  flex justify-center items-center"
             onClick={() => navigate("/")}
           >
             Helios
           </button>
         </div>
 
-        <div className="flex gap-[8vw] font-[600] text-[15px] text-neutral-500 justify-center items-center">
+        <div className="flex gap-[8vw] font-[600] sm:text-[15px] text-[10px] text-neutral-500 justify-center items-center">
           <button onClick={() => navigate("/MapPage")}>cctv현황</button>
           <button onClick={() => navigate("/DetectionHistory")}>
             탐지기록
