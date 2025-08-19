@@ -4,7 +4,7 @@ FROM node:18 AS build
 # 앱 소스 복사
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY . .
 RUN chmod +x node_modules/.bin/vite
