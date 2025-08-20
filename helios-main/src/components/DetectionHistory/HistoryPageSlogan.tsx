@@ -29,9 +29,6 @@ export default function HistoryPageSlogan() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                  <span className="text-red-600 text-lg"></span>
-                </div>
                 <div>
                   <div className="text-xl font-[700] text-red-600">127</div>
                   <div className="text-sm text-gray-600">위험 구간</div>
@@ -41,9 +38,6 @@ export default function HistoryPageSlogan() {
 
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <span className="text-yellow-600 text-lg"></span>
-                </div>
                 <div>
                   <div className="text-xl font-[700] text-yellow-600">284</div>
                   <div className="text-sm text-gray-600">주의 구간</div>
@@ -53,9 +47,6 @@ export default function HistoryPageSlogan() {
 
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <span className="text-green-600 text-lg"></span>
-                </div>
                 <div>
                   <div className="text-xl font-[700] text-green-600">1,892</div>
                   <div className="text-sm text-gray-600">안전 구간</div>
@@ -65,9 +56,6 @@ export default function HistoryPageSlogan() {
 
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <span className="text-blue-600 text-lg"></span>
-                </div>
                 <div>
                   <div className="text-xl font-[700] text-blue-600">오늘</div>
                   <div className="text-sm text-gray-600">마지막 업데이트</div>
