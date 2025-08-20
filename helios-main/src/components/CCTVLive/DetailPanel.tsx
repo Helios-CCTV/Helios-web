@@ -57,7 +57,7 @@ export default function DetailPanel({
 
   return (
     <div
-      className="left-[315px] absolute w-[380px] h-full top-[60px] overflow-y-auto bg-white border-l border-gray-200 shadow-lg text-sm z-50"
+      className="md:left-[315px] absolute md:w-[380px] h-full top-[60px] overflow-y-auto bg-white border-l border-gray-200 shadow-lg text-sm z-50"
       style={{
         height: "calc(100vh - 60px)",
         overflowY: "auto",
