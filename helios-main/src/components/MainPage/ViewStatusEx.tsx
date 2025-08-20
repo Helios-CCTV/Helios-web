@@ -9,7 +9,7 @@ export default function ViewStatusEx() {
 
         <div className="text-center z-10">
           {/* 메인 타이틀 */}
-          <div className="mt-20 font-[900] text-5xl lg:text-6xl flex flex-col gap-2 text-gray-800 leading-tight">
+          <div className="mt-50 md:mt-30 font-[900] text-3xl sm:text-5xl lg:text-6xl flex flex-col gap-2 text-gray-800 leading-tight">
             <div className="flex items-center justify-center gap-4">
               <span>전국 CCTV 현황</span>
               <span className="text-blue-500">한번에</span>
@@ -18,16 +18,18 @@ export default function ViewStatusEx() {
           </div>
 
           {/* 서브 텍스트 */}
-          <div className="mt-8 text-xl text-gray-600 font-[500] leading-relaxed">
+          <div className="mt-8 lg:text-xl text-gray-600 font-[500] leading-relaxed">
             <div>복잡했던 기존 시스템을 벗어나</div>
             <div className="mt-2">
-              <span className="text-blue-600 font-[700]">직관적이고 빠른</span>{" "}
+              <span className="text-blue-600 lg:text-xl font-[700]">
+                직관적이고 빠른
+              </span>{" "}
               CCTV 모니터링을 경험하세요
             </div>
           </div>
 
           {/* 특징 카드들 */}
-          <div className="mt-16 flex justify-center gap-8">
+          <div className="mt-16 flex justify-center gap-8 hidden md:flex">
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
               <div className="text-3xl mb-3">🗺️</div>
               <div className="font-[700] text-gray-800 mb-2">실시간 지도</div>
@@ -48,7 +50,7 @@ export default function ViewStatusEx() {
           </div>
 
           {/* 스크롤 안내 */}
-          <div className="mt-20 flex flex-col items-center">
+          <div className="mt-70 md:mt-20 flex flex-col items-center">
             <div className="text-gray-500 text-sm font-[500] mb-4">
               자세한 기능을 확인해보세요
             </div>

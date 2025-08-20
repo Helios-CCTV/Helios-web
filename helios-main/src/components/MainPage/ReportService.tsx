@@ -6,7 +6,7 @@ export default function ReportService() {
           {/* 좌측 제목 섹션 */}
           <div className="flex-shrink-0 max-w-lg">
             <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 px-6 py-3 rounded-full text-lg font-[700] mb-8 shadow-sm">
-              🚨 사용자 신고 서비스
+              사용자 신고 서비스
             </div>
 
             <div className="font-[900] text-4xl lg:text-5xl text-gray-800 leading-tight mb-6">
@@ -16,12 +16,15 @@ export default function ReportService() {
             </div>
 
             <div className="text-lg text-gray-700 font-[700] leading-relaxed mb-4">
-              시민 여러분의 적극적인 참여로 더 안전한 도로를 만들어가요
+              시민 여러분의 적극적인 참여로{" "}
+              <span className="block sm:inline">
+                더 안전한 도로를 만들어가요
+              </span>
             </div>
           </div>
 
           {/* 우측 기능 카드 섹션 */}
-          <div className="flex-1">
+          <div className="flex-1 hidden md:flex">
             <div className="grid grid-cols-2 gap-8">
               {/* 상단 좌측 - 직접 신고하기 */}
               <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group">

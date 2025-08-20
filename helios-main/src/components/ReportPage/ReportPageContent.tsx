@@ -26,7 +26,7 @@ export default function ReportPageContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 배너 영역 */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-16 mt-15">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-800 py-16 mt-15">
         <div className="max-w-4xl mx-auto px-6">
           <h1 className="text-4xl font-bold mb-4">도로 파손 신고</h1>
           <p className="text-xl opacity-90">
@@ -54,7 +54,16 @@ export default function ReportPageContent() {
                 파손 유형 <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {["포트홀", "균열", "침하", "함몰", "시공균열", "거북등", "쇼빙", "기타"].map((type) => (
+                {[
+                  "포트홀",
+                  "균열",
+                  "침하",
+                  "함몰",
+                  "시공균열",
+                  "거북등",
+                  "쇼빙",
+                  "기타",
+                ].map((type) => (
                   <button
                     key={type}
                     type="button"
@@ -91,7 +100,7 @@ export default function ReportPageContent() {
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-600 font-medium"
                   onClick={() => alert("지도에서 위치 선택 기능")}
                 >
-                  📍 지도에서 선택
+                  📍
                 </button>
               </div>
             </div>

@@ -35,22 +35,25 @@ export default function RoadInsightPanel({ cctvData }: Props) {
       // CCTV 이름에서 대괄호 안의 내용 추출 (예: "[국도1호선] 파주 봉일천4리" -> "국도1호선")
       const roadMatch = cctv.cctvname.match(/\[(.*?)\]/);
       const roadType = roadMatch ? roadMatch[1] : "일반도로";
-      
+
       // 지역명 추출 (CCTV 이름에서 마지막 부분)
-      const locationParts = cctv.cctvname.replace(/\[.*?\]\s*/, '').trim();
-      
+      const locationParts = cctv.cctvname.replace(/\[.*?\]\s*/, "").trim();
+
       // 인덱스 기반으로 임시 상태 할당 (실제로는 서버에서 받아온 데이터 사용)
-      const statusOptions: Array<{status: "위험" | "주의" | "안전", color: "red" | "yellow" | "green"}> = [
+      const statusOptions: Array<{
+        status: "위험" | "주의" | "안전";
+        color: "red" | "yellow" | "green";
+      }> = [
         { status: "안전", color: "green" },
         { status: "주의", color: "yellow" },
-        { status: "위험", color: "red" }
+        { status: "위험", color: "red" },
       ];
       const statusInfo = statusOptions[index % 3];
-      
+
       // 상태에 따른 가상의 손상 정보 생성
       let damageTypes: string[] = [];
       let damageCount = 0;
-      
+
       if (statusInfo.status === "위험") {
         damageTypes = ["포트홀", "균열"];
         damageCount = Math.floor(Math.random() * 5) + 3; // 3-7개
@@ -67,10 +70,11 @@ export default function RoadInsightPanel({ cctvData }: Props) {
         statusColor: statusInfo.color,
         damageTypes,
         damageCount,
-        lastDetected: index < 2 ? "방금 전" : `${Math.floor(Math.random() * 30) + 1}분 전`,
+        lastDetected:
+          index < 2 ? "방금 전" : `${Math.floor(Math.random() * 30) + 1}분 전`,
         cctvCount: 1, // 현재는 CCTV 1대당 1개 도로로 표시
         distance: `${(Math.random() * 3 + 0.5).toFixed(1)}km`,
-        cctvData: cctv
+        cctvData: cctv,
       };
     });
   }, [cctvData]);
@@ -104,12 +108,9 @@ export default function RoadInsightPanel({ cctvData }: Props) {
       (selectedFilter === "warning" && road.status === "주의") ||
       (selectedFilter === "safe" && road.status === "안전");
 
-    const matchesSearch = road.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase()) || 
-      road.location
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+    const matchesSearch =
+      road.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      road.location.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesFilter && matchesSearch;
   });
@@ -142,7 +143,7 @@ export default function RoadInsightPanel({ cctvData }: Props) {
         - overflow-y: auto 로 패널 내부만 스크롤되게 함
       */}
       <div
-        className="flex w-[315px] top-[60px] z-50 bg-gray-50 justify-center overflow-y-auto absolute border-r border-gray-200 shadow-sm"
+        className="hidden md:flex w-[315px] top-[60px] z-50 bg-gray-50 justify-center overflow-y-auto absolute border-r border-gray-200 shadow-sm"
         style={{
           height: "calc(100vh - 60px)",
           overflowY: "auto",
@@ -155,7 +156,7 @@ export default function RoadInsightPanel({ cctvData }: Props) {
             <h2 className="text-lg font-bold text-gray-800 mb-4">도로 현황</h2>
 
             {/* 검색바: 입력 시 setSearchQuery 로 상태가 갱신되고, 아래 filteredRoads 재계산 */}
-            <div className="relative mb-4">
+            <div className="relative mb-4 hidden md:flex">
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                 <img
                   className="w-4.5 h-5 opacity-80"
@@ -257,7 +258,7 @@ export default function RoadInsightPanel({ cctvData }: Props) {
           </div>
 
           {/* 목록 상단 정보행: 현재 필터/검색 결과의 총 개수와 업데이트 시각 */}
-          <div className="px-4 py-2">
+          <div className="px-4 py-2 hidden md:table-row">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-gray-600">
                 총 {filteredRoads.length}개 도로
@@ -319,10 +320,6 @@ export default function RoadInsightPanel({ cctvData }: Props) {
 
                   {/* 추가 메타 정보 + 상세보기 버튼(UX 요소) */}
                   <div className="flex items-center justify-between text-xs text-gray-500">
-                    <div className="flex items-center gap-3">
-                      <span>📹 CCTV {road.cctvCount}대</span>
-                      <span>📍 {road.distance}</span>
-                    </div>
                     <button className="text-blue-500 hover:text-blue-600 font-medium">
                       상세보기 →
                     </button>
@@ -336,10 +333,9 @@ export default function RoadInsightPanel({ cctvData }: Props) {
               <div className="text-center py-8">
                 <div className="text-4xl mb-2">🔍</div>
                 <p className="text-gray-500 text-sm">
-                  {cctvData.length === 0 
-                    ? "현재 지도 영역에 CCTV가 없습니다" 
-                    : "검색 결과가 없습니다"
-                  }
+                  {cctvData.length === 0
+                    ? "현재 지도 영역에 CCTV가 없습니다"
+                    : "검색 결과가 없습니다"}
                 </p>
               </div>
             )}

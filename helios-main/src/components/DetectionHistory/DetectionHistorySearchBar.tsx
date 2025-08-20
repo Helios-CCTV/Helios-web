@@ -67,13 +67,19 @@ export default function DetectionHistorySearchBar() {
           {/* 필터 탭 */}
           <div className="flex gap-2 overflow-x-auto pb-2">
             {[
-              { key: "all", label: "전체", icon: "📊", color: "blue" },
-              { key: "danger", label: "위험", icon: "🚨", color: "red" },
-              { key: "warning", label: "주의", icon: "⚠️", color: "yellow" },
-              { key: "safe", label: "안전", icon: "✅", color: "green" },
-              { key: "pothole", label: "포트홀", icon: "🕳️", color: "orange" },
-              { key: "crack", label: "균열", icon: "⚡", color: "purple" },
-              { key: "subsidence", label: "침하", icon: "📉", color: "indigo" },
+              { key: "crack2", label: "반사균열", color: "blue" },
+              { key: "crack3", label: "세로방향균열", color: "red" },
+              { key: "crack4", label: "밀림균열", color: "yellow" },
+              { key: "rutting", label: "러팅", color: "green" },
+              { key: "shoving", label: "코루게이션및쇼빙", color: "orange" },
+              { key: "hammol", label: "함몰", color: "purple" },
+              { key: "pothole", label: "포트홀", color: "indigo" },
+              { key: "label", label: "라벨링", color: "green" },
+              { key: "bakli", label: "박리", color: "blue" },
+              { key: "normal", label: "정상", color: "gray" },
+              { key: "danbu", label: "단부균열", color: "red" },
+              { key: "sigong", label: "시공균열", color: "yellow" },
+              { key: "turtleback", label: "거북등", color: "orange" },
             ].map((filter) => (
               <button
                 key={filter.key}
@@ -84,7 +90,6 @@ export default function DetectionHistorySearchBar() {
                     : `bg-${filter.color}-50 text-${filter.color}-700 hover:bg-${filter.color}-100 border border-${filter.color}-200`
                 }`}
               >
-                <span>{filter.icon}</span>
                 <span>{filter.label}</span>
               </button>
             ))}

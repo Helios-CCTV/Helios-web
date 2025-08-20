@@ -24,36 +24,38 @@ export default function Slogan() {
         {/* 슬로건 컨테이너 */}
         <div className="absolute z-30 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
           <div className="mb-6">
-            <div className="text-white text-4xl lg:text-6xl md:text-5xl sm:text-4xl font-[900] leading-tight drop-shadow-2xl">
-              AI가 먼저 알고 즉시 알려요.
+            <div className="text-white text-2xl lg:text-5xl md:text-4xl sm:text-3xl font-[900] leading-tight drop-shadow-2xl">
+              AI가 먼저 알고{" "}
+              <span className="block sm:inline">즉시 알려요.</span>
             </div>
-            <div className="text-white text-4xl lg:text-6xl md:text-5xl sm:text-4xl font-[900] leading-tight drop-shadow-2xl mt-4">
+            <div className="text-white text-xl lg:text-5xl md:text-4xl sm:text-3xl font-[900] leading-tight drop-shadow-2xl mt-4">
               더 안전한 길 우리와 함께
             </div>
           </div>
 
           {/* 서브 텍스트 추가 */}
-          <div className="text-white/90 text-lg lg:text-2xl md:text-xl font-[500] mt-8 drop-shadow-lg">
-            AI 기반 실시간 도로 파손 탐지 시스템
+          <div className="text-white/90 text-lg lg:text-3xl md:text-xl font-[500] mt-8 drop-shadow-lg">
+            AI 기반 실시간 도로{" "}
+            <span className="block sm:inline">파손 탐지 시스템</span>
           </div>
 
           {/* CTA 버튼 추가 */}
-          <div className="mt-12 flex gap-4 justify-center">
+          <div className="mt-12 flex gap-3 justify-center">
             <button
-              className="bg-blue-500 hover:bg-blue-600 text-white font-[700] px-8 py-4 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-xl"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-[700] px-4 py-3 rounded-4xl text-sm lg:text-lg transition-all duration-300 transform hover:scale-105 shadow-xl"
               onClick={() => {
                 navigate("/MapPage");
               }}
             >
-              CCTV 현황 보기
+              CCTV <span className="block sm:inline">현황보기</span>
             </button>
             <button
-              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-[700] px-8 py-4 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-xl border border-white/30"
+              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-[700] px-4 py-3 rounded-4xl text-sm lg:text-lg transition-all duration-300 transform hover:scale-105 shadow-xl border border-white/30"
               onClick={() => {
                 navigate("/ReportPage");
               }}
             >
-              도로 신고하기
+              도로 <span className="block sm:inline">신고하기</span>
             </button>
           </div>
         </div>
