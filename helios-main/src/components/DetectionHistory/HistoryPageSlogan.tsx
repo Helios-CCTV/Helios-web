@@ -30,7 +30,7 @@ export default function HistoryPageSlogan() {
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                  <span className="text-red-600 text-lg">🚨</span>
+                  <span className="text-red-600 text-lg"></span>
                 </div>
                 <div>
                   <div className="text-xl font-[700] text-red-600">127</div>
@@ -42,7 +42,7 @@ export default function HistoryPageSlogan() {
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <span className="text-yellow-600 text-lg">⚠️</span>
+                  <span className="text-yellow-600 text-lg"></span>
                 </div>
                 <div>
                   <div className="text-xl font-[700] text-yellow-600">284</div>
@@ -54,7 +54,7 @@ export default function HistoryPageSlogan() {
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <span className="text-green-600 text-lg">✅</span>
+                  <span className="text-green-600 text-lg"></span>
                 </div>
                 <div>
                   <div className="text-xl font-[700] text-green-600">1,892</div>
@@ -66,7 +66,7 @@ export default function HistoryPageSlogan() {
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <span className="text-blue-600 text-lg">📅</span>
+                  <span className="text-blue-600 text-lg"></span>
                 </div>
                 <div>
                   <div className="text-xl font-[700] text-blue-600">오늘</div>

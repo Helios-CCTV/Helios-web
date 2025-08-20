@@ -72,9 +72,9 @@ export default function DetectionHistoryContent() {
   // 심각도에 따른 상태 아이콘 및 스타일 반환
   const getSeverityIcon = (color: string) => {
     const icons = {
-      red: "🚨",
-      yellow: "⚠️",
-      green: "✅",
+      red: "",
+      yellow: "",
+      green: "",
     };
 
     const bgColors = {
@@ -148,18 +148,15 @@ export default function DetectionHistoryContent() {
             >
               {/* 모바일 및 태블릿용 레이아웃 */}
               <div className="lg:hidden">
-                <div className="flex items-start gap-4 mb-4">
-                  {/* 상태 아이콘 */}
-                  {getSeverityIcon(item.severity)}
-
+                <div className="flex items-start mb-4">
                   {/* 메인 정보 */}
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center justify-between mb-2">
                       <h3 className="font-[700] text-gray-800 text-lg">
                         {item.location}
                       </h3>
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-[600] ${
+                        className={`px-4 py-1 rounded-full text-xs font-[600] ${
                           item.severityColor === "red"
                             ? "bg-red-100 text-red-700"
                             : item.severityColor === "yellow"
@@ -196,7 +193,7 @@ export default function DetectionHistoryContent() {
               <div className="hidden lg:grid lg:grid-cols-6 gap-4 items-center">
                 {/* 상태 아이콘 */}
                 <div className="flex justify-center">
-                  {getSeverityIcon(item.severity)}
+                  {getSeverityIcon(item.severityColor)}
                 </div>
 
                 {/* 위치 정보 */}
