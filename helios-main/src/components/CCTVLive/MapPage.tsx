@@ -37,6 +37,7 @@ interface KakaoBounds {
 type MapPageProps = {
   onBoundsChange?: (bounds: BoundingBox) => void; // 지도 영역 변경
   onData?: (data: CCTVData[]) => void; // CCTV 데이터 변경
+  onMapLevelChange?: (level: number) => void; // 지도 레벨 변경
 };
 
 /**
@@ -44,7 +45,11 @@ type MapPageProps = {
  * 카카오맵을 표시하고 CCTV 마커를 동적으로 로드하는 페이지
  * React Query를 사용하여 효율적인 데이터 관리
  */
-export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
+export default function MapPage({
+  onBoundsChange,
+  onData,
+  onMapLevelChange,
+}: MapPageProps) {
   // 카카오맵 인스턴스 참조
   const mapRef = useRef<any>(null);
 
@@ -57,8 +62,13 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
   // 현재 지도 영역의 경계 좌표 상태
   const [currentBounds, setCurrentBounds] = useState<BoundingBox | null>(null);
 
+  // 선택한 CCTV에 대한 정보 상태
   const [selectedCCTV, setSelectedCCTV] = useState<CCTVData | null>(null);
+
+  // DetailPanel의 열림 상태
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
+
+  const [mapLevel, setMapLevel] = useState<number>(9);
 
   const handleRoadClick = (cctvData: CCTVData) => {
     setSelectedCCTV(cctvData);
@@ -72,17 +82,19 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
 
   // React Query를 사용한 CCTV 데이터 패칭
   // currentBounds가 변경될 때마다 자동으로 새로운 데이터를 가져옴
+
   const {
     data: cctvData = [],
     isLoading,
     isError,
     error,
   } = useQuery({
-    queryKey: currentBounds
-      ? getCCTVQueryKey(currentBounds)
-      : ["cctv-data", "empty"],
+    queryKey:
+      currentBounds && mapLevel < 8
+        ? getCCTVQueryKey(currentBounds, mapLevel)
+        : ["cctv-data", "empty"],
     queryFn: () =>
-      currentBounds
+      currentBounds && mapLevel < 8
         ? fetchCCTVDataByBounds(currentBounds)
         : Promise.resolve([]),
     enabled: !!currentBounds, // currentBounds가 있을 때만 쿼리 실행
@@ -117,45 +129,46 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
    * 기존 마커를 모두 제거하고 새로운 데이터로 마커를 생성
    * @param data - 표시할 CCTV 데이터 배열
    */
-  const displayMarkers = useCallback((data: CCTVData[]) => {
-    // 카카오맵이 로드되지 않았다면 함수 종료
-    if (!mapRef.current || !window.kakao) {
-      console.warn("⚠️ 카카오맵이 아직 로드되지 않았습니다.");
-      return;
-    }
+  const displayMarkers = useCallback(
+    (data: CCTVData[]) => {
+      // 카카오맵이 로드되지 않았다면 함수 종료
+      if (!mapRef.current || !window.kakao) {
+        console.warn("⚠️ 카카오맵이 아직 로드되지 않았습니다.");
+        return;
+      }
 
-    // 기존에 표시된 모든 마커들을 지도에서 제거
-    markersRef.current.forEach((marker) => {
-      marker.setMap(null); // 지도에서 마커 제거
-    });
-    markersRef.current = []; // 마커 배열 초기화
+      // 기존에 표시된 모든 마커들을 지도에서 제거
+      markersRef.current.forEach((marker) => {
+        marker.setMap(null); // 지도에서 마커 제거
+      });
+      markersRef.current = []; // 마커 배열 초기화
 
-    // 열려있는 정보창이 있다면 닫기
-    if (infoWindowRef.current) {
-      infoWindowRef.current.close();
-      infoWindowRef.current = null;
-    }
+      // 열려있는 정보창이 있다면 닫기
+      if (infoWindowRef.current) {
+        infoWindowRef.current.close();
+        infoWindowRef.current = null;
+      }
 
-    // 새로운 CCTV 데이터로 마커들 생성
-    data.forEach((cctv, index) => {
-      try {
-        // 문자열로 된 좌표를 숫자로 변환하여 카카오맵 좌표 객체 생성
-        const lat = parseFloat(cctv.coordy); // 위도
-        const lng = parseFloat(cctv.coordx); // 경도
+      // 새로운 CCTV 데이터로 마커들 생성
+      data.forEach((cctv, index) => {
+        try {
+          // 문자열로 된 좌표를 숫자로 변환하여 카카오맵 좌표 객체 생성
+          const lat = parseFloat(cctv.coordy); // 위도
+          const lng = parseFloat(cctv.coordx); // 경도
 
-        // 좌표 유효성 검사
-        if (isNaN(lat) || isNaN(lng)) {
-          console.warn(`⚠️ 잘못된 좌표 (${index + 1}번째 CCTV):`, cctv);
-          return;
-        }
+          // 좌표 유효성 검사
+          if (isNaN(lat) || isNaN(lng)) {
+            console.warn(`⚠️ 잘못된 좌표 (${index + 1}번째 CCTV):`, cctv);
+            return;
+          }
 
-        const position = new window.kakao.maps.LatLng(lat, lng);
+          const position = new window.kakao.maps.LatLng(lat, lng);
 
-        // CCTV 아이콘을 위한 SVG 이미지 생성
-        // Base64로 인코딩된 SVG를 data URL로 사용
-        const imageSrc =
-          "data:image/svg+xml;base64," +
-          btoa(`
+          // CCTV 아이콘을 위한 SVG 이미지 생성
+          // Base64로 인코딩된 SVG를 data URL로 사용
+          const imageSrc =
+            "data:image/svg+xml;base64," +
+            btoa(`
           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
             <circle cx="14" cy="14" r="12" fill="#3B82F6" stroke="#1E40AF" stroke-width="2"/>
             <circle cx="14" cy="14" r="8" fill="#ffffff"/>
@@ -163,36 +176,36 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
           </svg>
         `);
 
-        // 마커 이미지 크기 설정
-        const imageSize = new window.kakao.maps.Size(28, 28);
-        const imageOption = {
-          offset: new window.kakao.maps.Point(14, 14), // 마커 중심점 설정
-        };
+          // 마커 이미지 크기 설정
+          const imageSize = new window.kakao.maps.Size(14, 14);
+          const imageOption = {
+            offset: new window.kakao.maps.Point(14, 14), // 마커 중심점 설정
+          };
 
-        // 마커 이미지 객체 생성
-        const markerImage = new window.kakao.maps.MarkerImage(
-          imageSrc,
-          imageSize,
-          imageOption
-        );
+          // 마커 이미지 객체 생성
+          const markerImage = new window.kakao.maps.MarkerImage(
+            imageSrc,
+            imageSize,
+            imageOption
+          );
 
-        // 마커 객체 생성
-        const marker = new window.kakao.maps.Marker({
-          position: position, // 마커 위치
-          image: markerImage, // 마커 이미지
-          title: cctv.cctvname, // 마커 툴팁 (브라우저 기본 툴팁)
-          clickable: true, // 클릭 가능하도록 설정
-        });
+          // 마커 객체 생성
+          const marker = new window.kakao.maps.Marker({
+            position: position, // 마커 위치
+            image: markerImage, // 마커 이미지
+            title: cctv.cctvname, // 마커 툴팁 (브라우저 기본 툴팁)
+            clickable: true, // 클릭 가능하도록 설정
+          });
 
-        // 마커를 지도에 표시
-        marker.setMap(mapRef.current);
+          marker.setMap(mapRef.current);
+          onMapLevelChange?.(mapLevel); // 부모 컴포넌트에 지도 레벨 변경 알림
 
-        // 마커를 배열에 추가 (나중에 제거하기 위함)
-        markersRef.current.push(marker);
+          // 마커를 배열에 추가 (나중에 제거하기 위함)
+          markersRef.current.push(marker);
 
-        // 마커 호버 시 표시할 정보창 생성
-        const infoWindow = new window.kakao.maps.InfoWindow({
-          content: `
+          // 마커 호버 시 표시할 정보창 생성
+          const infoWindow = new window.kakao.maps.InfoWindow({
+            content: `
             <div style="
               padding: 10px 12px;
               font-size: 13px;
@@ -214,55 +227,57 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
               </div>
             </div>
           `,
-          removable: false, // 사용자가 X 버튼으로 닫을 수 없게 설정
-          zIndex: 1000, // 다른 요소들 위에 표시
-        });
-
-        // 마커에 마우스를 올렸을 때 이벤트
-        window.kakao.maps.event.addListener(marker, "mouseover", function () {
-          // 다른 정보창이 열려있다면 먼저 닫기
-          if (infoWindowRef.current) {
-            infoWindowRef.current.close();
-          }
-
-          // 현재 마커의 정보창 열기
-          infoWindow.open(mapRef.current, marker);
-          infoWindowRef.current = infoWindow;
-        });
-
-        // 마커에서 마우스를 뗐을 때 이벤트
-        window.kakao.maps.event.addListener(marker, "mouseout", function () {
-          // 약간의 지연 후 정보창 닫기 (깜빡임 방지)
-          setTimeout(() => {
-            if (infoWindowRef.current === infoWindow) {
-              infoWindow.close();
-              infoWindowRef.current = null;
-            }
-          }, 150);
-        });
-
-        // 마커 클릭 이벤트 (추후 CCTV 상세보기 등에 활용 가능)
-        window.kakao.maps.event.addListener(marker, "click", function () {
-          console.log("🎬 CCTV 클릭:", {
-            name: cctv.cctvname,
-            url: cctv.cctvurl,
-            coordinates: { lat, lng },
-            type: cctv.cctvtype,
-            format: cctv.cctvformat,
+            removable: false, // 사용자가 X 버튼으로 닫을 수 없게 설정
+            zIndex: 1000, // 다른 요소들 위에 표시
           });
-          handleRoadClick(cctv);
-        });
 
-        // console.log(`✅ 마커 생성 완료: ${cctv.cctvname} (${lat}, ${lng})`);
-      } catch (error) {
-        console.error(
-          `❌ 마커 생성 실패 (${index + 1}번째 CCTV):`,
-          error,
-          cctv
-        );
-      }
-    });
-  }, []);
+          // 마커에 마우스를 올렸을 때 이벤트
+          window.kakao.maps.event.addListener(marker, "mouseover", function () {
+            // 다른 정보창이 열려있다면 먼저 닫기
+            if (infoWindowRef.current) {
+              infoWindowRef.current.close();
+            }
+
+            // 현재 마커의 정보창 열기
+            infoWindow.open(mapRef.current, marker);
+            infoWindowRef.current = infoWindow;
+          });
+
+          // 마커에서 마우스를 뗐을 때 이벤트
+          window.kakao.maps.event.addListener(marker, "mouseout", function () {
+            // 약간의 지연 후 정보창 닫기 (깜빡임 방지)
+            setTimeout(() => {
+              if (infoWindowRef.current === infoWindow) {
+                infoWindow.close();
+                infoWindowRef.current = null;
+              }
+            }, 150);
+          });
+
+          // 마커 클릭 이벤트 (추후 CCTV 상세보기 등에 활용 가능)
+          window.kakao.maps.event.addListener(marker, "click", function () {
+            console.log("🎬 CCTV 클릭:", {
+              name: cctv.cctvname,
+              url: cctv.cctvurl,
+              coordinates: { lat, lng },
+              type: cctv.cctvtype,
+              format: cctv.cctvformat,
+            });
+            handleRoadClick(cctv);
+          });
+
+          // console.log(`✅ 마커 생성 완료: ${cctv.cctvname} (${lat}, ${lng})`);
+        } catch (error) {
+          console.error(
+            `❌ 마커 생성 실패 (${index + 1}번째 CCTV):`,
+            error,
+            cctv
+          );
+        }
+      });
+    },
+    [onMapLevelChange, mapLevel]
+  );
 
   /**
    * 지도 영역이 변경되었을 때 호출되는 함수
@@ -313,12 +328,14 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
       // 지도 초기 옵션 설정
       const mapOption = {
         center: new window.kakao.maps.LatLng(37.35, 127.1324), // 서울 강남역 근처 좌표
-        level: 9, // 지도 확대 레벨 (1~14, 숫자가 작을수록 더 확대)
+        level: mapLevel, // 지도 확대 레벨 (1~14, 숫자가 작을수록 더 확대)
       };
 
       // 카카오맵 인스턴스 생성 및 ref에 저장
       const map = new window.kakao.maps.Map(mapContainer, mapOption);
       mapRef.current = map;
+
+      setMapLevel(map.getLevel()); // 현재 지도 레벨 저장
 
       // 지도 로딩 완료 후 초기 CCTV 데이터 로드
       // setTimeout을 사용해 지도 렌더링이 완료된 후 bounds 설정
@@ -337,6 +354,8 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
         // 0.5초 후에 API 호출 (사용자가 지도 조작을 멈췄을 때)
         boundsChangedTimeout = window.setTimeout(() => {
           const bounds = map.getBounds(); // 변경된 지도 영역 가져오기
+          const level = map.getLevel(); // 현재 지도 레벨 가져오기
+          setMapLevel(level);
           handleBoundsChanged(bounds); // 새 영역의 CCTV 데이터 로드
         }, 500); // 디바운싱 시간을 500ms로 설정
       });
@@ -364,7 +383,7 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
         "❌ 카카오맵 API가 로드되지 않았습니다. index.html에서 스크립트 태그를 확인해주세요."
       );
     }
-  }, [handleBoundsChanged]); // handleBoundsChanged가 변경될 때만 useEffect 재실행
+  }, []);
 
   // 컴포넌트 렌더링
   return (
@@ -394,26 +413,6 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
         </div>
       )}
 
-      {/* CCTV 개수 표시 카운터 - 우상단에 표시 */}
-      {cctvData && cctvData.length > 0 && (
-        <div className="absolute top-20 right-4 z-10 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-lg px-4 py-2">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold">📹 실시간 CCTV</span>
-            {/* 현재 표시된 CCTV 마커 개수 */}
-            <span className="bg-white text-blue-600 rounded-full px-2 py-1 text-xs font-bold min-w-[1.5rem] text-center">
-              {cctvData.length}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* API URL 디버그 정보 (개발 모드에서만) */}
-      {import.meta.env.DEV && (
-        <div className="absolute top-30 right-4 z-10 bg-gray-800 text-white rounded-lg shadow-lg px-3 py-2 text-xs opacity-75">
-          API: {import.meta.env.VITE_CCTV_API_URL}
-        </div>
-      )}
-
       {/* DetailPanel, 마커 클릭시 정보 제공과 동시에 표시됨 */}
       {isDetailPanelOpen && selectedCCTV && (
         <>
@@ -426,3 +425,23 @@ export default function MapPage({ onBoundsChange, onData }: MapPageProps) {
     </div>
   );
 }
+
+// {/* CCTV 개수 표시 카운터 - 우상단에 표시 */}
+// {cctvData && cctvData.length > 0 && (
+//   <div className="absolute top-20 right-4 z-10 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-lg px-4 py-2">
+//     <div className="flex items-center gap-3">
+//       <span className="text-sm font-semibold">📹 실시간 CCTV</span>
+//       {/* 현재 표시된 CCTV 마커 개수 */}
+//       <span className="bg-white text-blue-600 rounded-full px-2 py-1 text-xs font-bold min-w-[1.5rem] text-center">
+//         {cctvData.length}
+//       </span>
+//     </div>
+//   </div>
+// )}
+
+// {/* API URL 디버그 정보 (개발 모드에서만) */}
+// {import.meta.env.DEV && (
+//   <div className="absolute top-30 right-4 z-10 bg-gray-800 text-white rounded-lg shadow-lg px-3 py-2 text-xs opacity-75">
+//     API: {import.meta.env.VITE_CCTV_API_URL}
+//   </div>
+// )}

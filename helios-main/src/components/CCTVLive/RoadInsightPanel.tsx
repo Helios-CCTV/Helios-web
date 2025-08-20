@@ -7,7 +7,7 @@ import type { CCTVData } from "../../API/cctvAPI";
 // 현재 선택된 상태 필터(전체/위험/주의/안전)
 // 검색어(실시간 입력값)
 
-type Props = { cctvData: CCTVData[] };
+type Props = { cctvData: CCTVData[]; mapLevel: number };
 
 // CCTV 데이터를 기반으로 한 도로 정보 타입
 interface RoadInfo {
@@ -24,13 +24,21 @@ interface RoadInfo {
   cctvData: CCTVData; // 원본 CCTV 데이터 참조
 }
 
-export default function RoadInsightPanel({ cctvData }: Props) {
+export default function RoadInsightPanel(
+  { cctvData }: Props,
+  mapLevel: number
+) {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   // cctvData를 기반으로 도로 정보 생성
   // 각 CCTV의 cctvname을 도로명으로 사용하고, 임의로 상태를 부여
+
   const roadData = useMemo((): RoadInfo[] => {
+    if (mapLevel > 8) {
+      return [];
+    }
+
     return cctvData.map((cctv, index) => {
       // CCTV 이름에서 대괄호 안의 내용 추출 (예: "[국도1호선] 파주 봉일천4리" -> "국도1호선")
       const roadMatch = cctv.cctvname.match(/\[(.*?)\]/);
@@ -77,7 +85,7 @@ export default function RoadInsightPanel({ cctvData }: Props) {
         cctvData: cctv,
       };
     });
-  }, [cctvData]);
+  }, [cctvData, mapLevel]);
 
   // 사용자가 클릭한 CCTV 정보를 보관하는 상태
   // 상세 패널(DetailPanel) 열림/닫힘 상태

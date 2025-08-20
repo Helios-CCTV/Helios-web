@@ -30,6 +30,15 @@ export interface CCTVData {
   cctvname: string; // CCTV 이름/위치 설명
 }
 
+export interface CCTVDataTopLevel {
+  regionId: string;
+  localname: string;
+  coordx: number;
+  coordy: number;
+  count: number;
+  polygon: string; // GeoJSON 형식의 폴리곤 좌표
+}
+
 /**
  * API 응답 구조 정의
  */
@@ -129,6 +138,7 @@ export const fetchCCTVDataByBounds = async (
         maxX: bounds.maxX,
         minY: bounds.minY,
         maxY: bounds.maxY,
+        level: 7,
       },
     });
 
@@ -181,8 +191,8 @@ export const fetchCCTVDataByBounds = async (
  * @returns React Query 키 배열
  */
 // QueryKey이며 같은 경계로 다시 열람했을 경우 캐시를 재사용 ;; ㅅㅂ 뭐라는지 모르겠음
-export const getCCTVQueryKey = (bounds: BoundingBox) => {
-  return ["cctv-data", bounds] as const;
+export const getCCTVQueryKey = (bounds: BoundingBox, level: number) => {
+  return ["cctv-data", bounds, level] as const;
 };
 
 /**
