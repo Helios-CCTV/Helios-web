@@ -222,7 +222,6 @@ export default function MapPage({
               position: relative;
             ">
               <div style="display: flex; justify-content: center; align-items: center; gap: 6px;">
-                <span style="font-size: 16px;">📹</span>
                 <span>${cctv.cctvname}</span>
               </div>
             </div>

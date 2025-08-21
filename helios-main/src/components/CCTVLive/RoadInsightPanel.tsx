@@ -24,10 +24,7 @@ interface RoadInfo {
   cctvData: CCTVData; // 원본 CCTV 데이터 참조
 }
 
-export default function RoadInsightPanel(
-  { cctvData }: Props,
-  mapLevel: number
-) {
+export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
