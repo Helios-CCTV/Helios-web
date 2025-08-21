@@ -44,7 +44,7 @@ export default function ReportService() {
                   <div className="text-sm text-gray-600 leading-relaxed">
                     <div>사용자가 도로의 위험을 직접 신고해서</div>
                     <div className="text-red-600 font-[600]">
-                      더 좋은 데이터를 제공해주세요
+                      더 좋은 데이터를 제공해주세요.
                     </div>
                   </div>
                 </div>

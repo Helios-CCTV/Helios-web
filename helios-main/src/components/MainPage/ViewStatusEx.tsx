@@ -50,7 +50,7 @@ export default function ViewStatusEx() {
           </div>
 
           {/* 스크롤 안내 */}
-          <div className="mt-70 md:mt-20 flex flex-col items-center">
+          <div className="mt-40 md:mt-20 flex flex-col items-center">
             <div className="text-gray-500 text-sm font-[500] mb-4">
               자세한 기능을 확인해보세요
             </div>

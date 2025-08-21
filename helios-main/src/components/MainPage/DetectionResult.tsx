@@ -5,7 +5,7 @@ export default function DetectionResult() {
         {/* 헤더 섹션 */}
         <div className="text-center mb-16">
           <div className="font-[900] text-2xl sm:text-3xl lg:text-4xl text-gray-800 leading-tight mt-30">
-            AI가 탐지한 결과를 모아봤어요.
+            AI가 탐지한 결과를 모아봤어요
           </div>
         </div>
 
@@ -54,7 +54,7 @@ export default function DetectionResult() {
               <div className="text-center mb-6">
                 <div className="font-[700] text-sm text-gray-800 leading-relaxed">
                   <div>도로 속 위험을 AI가</div>
-                  <div className="text-red-600">찾아서 알려줘요</div>
+                  <div className="text-red-600">찾아서 알려줘요.</div>
                 </div>
               </div>
 
@@ -82,7 +82,7 @@ export default function DetectionResult() {
             <div className="font-[700] text-1xl lg:text-2xl text-gray-800 leading-relaxed mb-4">
               <div>처음 사용하는 사용자도 이해할 수 있게,</div>
               <div className="text-blue-600 mt-2">
-                쉽고 빠르게 탐지 결과를 확인해봐요.
+                쉽고 빠르게 탐지 결과를 확인해봐요
               </div>
             </div>
           </div>
