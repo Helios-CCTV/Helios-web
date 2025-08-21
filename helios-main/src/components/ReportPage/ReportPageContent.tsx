@@ -29,8 +29,8 @@ export default function ReportPageContent() {
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-800 py-16 mt-15">
         <div className="max-w-4xl mx-auto px-6">
           <h1 className="text-4xl font-bold mb-4">도로 파손 신고</h1>
-          <p className="text-xl opacity-90">
-            안전한 도로를 위해 파손된 도로를 신고해 주세요
+          <p className="text-xl opacity-90 font-[600]">
+            안전한 도로를 위해 파손된 도로를 신고해 주세요.
           </p>
         </div>
       </div>
@@ -41,8 +41,8 @@ export default function ReportPageContent() {
           {/* 폼 헤더 */}
           <div className="bg-gray-50 px-8 py-6 border-b border-gray-200">
             <h2 className="text-2xl font-bold text-gray-800">신고 정보 입력</h2>
-            <p className="text-gray-600 mt-2">
-              정확한 정보를 입력해 주시면 빠른 처리가 가능합니다
+            <p className="text-gray-600 mt-2 font-[500]">
+              정확한 정보를 입력해 주시면 빠른 처리가 가능합니다.
             </p>
           </div>
 
@@ -199,7 +199,7 @@ export default function ReportPageContent() {
                 연락처 정보 (선택)
               </h3>
               <p className="text-sm text-gray-600">
-                처리 결과를 알려드리기 위한 연락처입니다
+                처리 결과를 알려드리기 위한 연락처입니다.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
@@ -237,7 +237,7 @@ export default function ReportPageContent() {
                 신고 접수하기
               </button>
               <p className="text-sm text-gray-500 text-center mt-3">
-                신고 접수 후 24시간 이내에 검토 결과를 알려드립니다
+                신고 접수 후 24시간 이내에 검토 결과를 알려드립니다.
               </p>
             </div>
           </form>
@@ -256,14 +256,14 @@ export default function ReportPageContent() {
             <div className="text-2xl mb-3">🔒</div>
             <h3 className="font-semibold text-gray-800 mb-2">개인정보 보호</h3>
             <p className="text-sm text-gray-600">
-              입력하신 개인정보는 신고 처리 목적으로만 사용됩니다
+              입력하신 개인정보는 신고 처리 목적으로만 사용됩니다.
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <div className="text-2xl mb-3">📱</div>
             <h3 className="font-semibold text-gray-800 mb-2">실시간 알림</h3>
             <p className="text-sm text-gray-600">
-              처리 진행 상황을 문자나 앱 알림으로 실시간 확인 가능합니다
+              처리 진행 상황을 문자나 앱 알림으로 실시간 확인 가능합니다.
             </p>
           </div>
         </div>

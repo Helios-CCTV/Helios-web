@@ -21,7 +21,7 @@ export default function ViewStatus() {
                   </span>
                 </div>
                 <div className="mt-2 text-blue-600">
-                  볼 수 있는 서비스를 제공해요
+                  볼 수 있는 서비스를 제공해요.
                 </div>
               </div>
               <span className="text-sm font-[600] text-gray-500 md:hidden">
@@ -64,7 +64,7 @@ export default function ViewStatus() {
           <div className="flex-1 max-w-2xl">
             <div className="font-[900] text-2xl lg:text-3xl leading-tight text-gray-800 mb-6">
               <div>파손된 도로를 AI가 분석해</div>
-              <span className="text-red-600 mt-2">알려줘요.</span>
+              <span className="text-red-600 mt-2">알려줘요</span>
             </div>
 
             <div className="md:bg-white md:p-6 rounded-2xl md:shadow-lg md:border md:border-gray-100">
