@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import Hls from "hls.js";
 import type { CCTVData } from "../../API/cctvAPI";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAnalyzeData } from "../../API/Analyze";
 
 interface DetailPanelProps {
   selectedcctv: CCTVData;
@@ -14,6 +16,18 @@ export default function DetailPanel({
   const [selectedPeriod, setSelectedPeriod] = useState("1month");
   const [isExpanded, setIsExpanded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const analyzeListQuery = useQuery({
+    queryKey: ["analyzeList"],
+    queryFn: fetchAnalyzeData,
+    staleTime: 60 * 1000,
+  });
+
+  const analyzerListData = analyzeListQuery.data || [];
+
+  const matchedAnalyze = analyzerListData.find(
+    (item) => item.cctvName === selectedcctv.cctvname
+  );
 
   // CCTV 데이터를 기반으로 가상의 도로 파손 정보 생성
   const damageCount = Math.floor(Math.random() * 10) + 1;
@@ -44,6 +58,10 @@ export default function DetailPanel({
 
     loadHLS();
   }, [selectedcctv.cctvurl, selectedcctv.cctvformat]);
+
+  if (!analyzeListQuery.isLoading && !analyzeListQuery.isError) {
+    console.log("분석 데이터:", analyzerListData);
+  }
 
   const detectionHistory = [
     { date: "2025.08.06", type: "포트홀", count: 5, severity: "위험" },
@@ -104,16 +122,12 @@ export default function DetailPanel({
             </h3>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="text-center">
+          <div className="flex-col gap-6 mb-3">
+            <div className="text-center flex-col justify-center items-center">
               <div className="text-2xl font-bold text-orange-600">
-                {damageCount}
+                {matchedAnalyze ? matchedAnalyze.detections.length : 0}
               </div>
               <div className="text-xs text-gray-600">이번 달 탐지</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">7</div>
-              <div className="text-xs text-gray-600">오늘 탐지</div>
             </div>
           </div>
 
