@@ -27,13 +27,27 @@ export default function DetailPanel({
   // 가져온 분석 데이터 중 data 파트 가져옴
   const analyzerListData = analyzeListQuery.data || [];
 
-  // 선택된 CCTV에 해당하는 분석 데이터 가져오기
+  // 전체 분석결과 값에서 선택된 CCTV 이름과 매칭되는 결과 찾기
+  // find 함수를 이용
   const matchedAnalyze = analyzerListData.find(
     (item) => item.cctvName === selectedcctv.cctvname
   );
 
-  // CCTV 데이터를 기반으로 가상의 도로 파손 정보 생성
-  const damageTypes = ["포트홀", "균열", "침하"];
+  // 탐지된 유형 목록 만들기
+  const damageTypes = matchedAnalyze
+    ? Array.from(new Set(matchedAnalyze.detections.map((d: any) => d.label)))
+    : [];
+
+  // 최근 탐지된 결과값을 하나의 표 형태로 변환
+  // date, type, count, severity 필드로 설정
+  const detectionHistory = matchedAnalyze
+    ? matchedAnalyze.detections.map((d: any) => ({
+        date: d.date ?? "-",       // API에서 제공하는 날짜 필드
+        type: d.label,
+        count: d.count ?? 1,       // count 필드 있으면 사용, 없으면 1
+        severity: d.severity ?? "주의", // severity 필드 있으면 사용
+      }))
+    : [];
 
   // HLS 영상 초기화
   useEffect(() => {
@@ -64,14 +78,6 @@ export default function DetailPanel({
   if (!analyzeListQuery.isLoading && !analyzeListQuery.isError) {
     console.log("분석 데이터:", analyzerListData);
   }
-
-  const detectionHistory = [
-    { date: "2025.08.06", type: "포트홀", count: 5, severity: "위험" },
-    { date: "2025.08.05", type: "균열", count: 3, severity: "주의" },
-    { date: "2025.08.04", type: "침하", count: 2, severity: "주의" },
-    { date: "2025.08.03", type: "포트홀", count: 1, severity: "주의" },
-    { date: "2025.08.02", type: "균열", count: 4, severity: "위험" },
-  ];
 
   const riskLevel = 65; // 위험도 퍼센티지
 
@@ -173,7 +179,9 @@ export default function DetailPanel({
                 {matchedAnalyze ? matchedAnalyze.detections.length : 0}건
               </div>
               <div className="text-xs text-gray-600">
-                {damageTypes.join(" • ")}
+                {/* 탐지된 유형 목록 */}
+                {damageTypes.length > 0 ? damageTypes.join(" • ") : "탐지된 유형 없음"} 
+                
               </div>
             </div>
           </div>
