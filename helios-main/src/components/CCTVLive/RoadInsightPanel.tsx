@@ -2,7 +2,7 @@
 // 항목을 클릭하면 우측의 DetailPanel을 열어 상세 정보를 보여주는 컴포넌트
 
 // React 필요 import
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import DetailPanel from "./DetailPanel";
 import { useQuery } from "@tanstack/react-query";
 
@@ -135,6 +135,63 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
       return matchesFilter && matchesSearch;
     });
   }, [rows, selectedFilter, searchQuery]);
+
+  // -------------------------------------------------
+  // 간단 페이지네이션 (숫자 버튼, 페이지 이동)
+  //   현재 페이지에 해당하는 10개의 파손정보만 보여줍니다.
+  // -------------------------------------------------
+  
+  // 현재 페이지에 대한 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // 한 페이지에 보여질 숫자
+  const PER_PAGE = 10;
+
+  // 필터/검색/데이터가 바뀌면 1페이지로 초기화
+  /**
+   * rows : 뷰포트 cctv
+   * selectedFilter : 위험 상태
+   * searchQuery : 검색어
+   */
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [rows, selectedFilter, searchQuery]);
+
+  // 전체 페이지 계산
+  const totalPages = Math.max(1, Math.ceil(filteredRoads.length / PER_PAGE));
+
+  // 현재 페이지가 총 페이지를 초과하는 경우
+  // if : 3페이지에 있을 때 필터링 결과가 2 페이지로 바뀔 때 자동으로 1페이지로 이동
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [totalPages, currentPage]);
+
+  // 현재 페이지 아이템 (10개)
+  const pagedRoads = useMemo(() => {
+    const start = (currentPage - 1) * PER_PAGE;
+    return filteredRoads.slice(start, start + PER_PAGE);
+  }, [filteredRoads, currentPage]);
+
+  // 하단 숫자 버튼에 사용할 페이지 배열 (단순/가독성 위주)
+  // - 전체 페이지가 10 이하: 1..totalPages 모두 노출
+  // - 11개 이상일 경우 ...으로 표기
+  const getPageNumbers = (total: number, current: number) => {
+    const pages: (number | string)[] = [];
+    if (total <= 10) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+      return pages;
+    }
+    pages.push(1);
+    const start = Math.max(2, current - 2);
+    const end = Math.min(total - 1, current + 2);
+    if (start > 2) pages.push("…");
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < total - 1) pages.push("…");
+    pages.push(total);
+    return pages;
+  };
+
+  const pageNumbers = useMemo(() => getPageNumbers(totalPages, currentPage), [totalPages, currentPage]);
 
   // 상태 뱃지 렌더링 유틸: 상태값과 색상 키에 따라 Tailwind 클래스를 매핑
   const getStatusBadge = (status: string, color: string) => {
@@ -303,7 +360,7 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
 
             {/* 필터/검색 결과 목록 렌더링: 각 카드 클릭 시 handleRoadClick 호출 */}
             <div className="space-y-3">
-              {filteredRoads.map((road) => (
+              {pagedRoads.map((road) => (
                 <div
                   key={road.id}
                   className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all cursor-pointer hover:border-blue-200"
@@ -360,6 +417,32 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
                 </div>
               ))}
             </div>
+
+            {/* 페이지네이션: 하단 숫자 버튼 + 이전/다음 */}
+            {filteredRoads.length > 0 && (
+              <div className="flex items-center justify-center gap-2 mt-4 select-none mb-4">
+                
+
+                {pageNumbers.map((p, idx) =>
+                  typeof p === "number" ? (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentPage(p)}
+                      className={`px-2.5 py-1.5 text-xs rounded border ${
+                        p === currentPage
+                          ? "bg-blue-500 text-white border-blue-500"
+                          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-100"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ) : (
+                    <span key={idx} className="px-1 text-xs text-gray-400">{p}</span>
+                  )
+                )}
+
+              </div>
+            )}
 
             {/* 검색/필터 결과가 없을 때의 빈 상태(Empty State) */}
             {filteredRoads.length === 0 && (
