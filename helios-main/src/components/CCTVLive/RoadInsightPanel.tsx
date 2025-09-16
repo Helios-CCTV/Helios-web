@@ -1,88 +1,101 @@
 // RoadInsightPanel: 좌측 사이드 패널에서 도로 목록을 필터/검색하고,
 // 항목을 클릭하면 우측의 DetailPanel을 열어 상세 정보를 보여주는 컴포넌트
+
+// React 필요 import
 import { useState, useMemo } from "react";
 import DetailPanel from "./DetailPanel";
+import { useQuery } from "@tanstack/react-query";
+
+// 타입, API import
 import type { CCTVData } from "../../API/cctvAPI";
+import type { AnalyzeModel } from "../../API/Analyze";
+import { fetchAnalyzeData } from "../../API/Analyze";
 
 // 현재 선택된 상태 필터(전체/위험/주의/안전)
 // 검색어(실시간 입력값)
 
 type Props = { cctvData: CCTVData[]; mapLevel: number };
 
-// CCTV 데이터를 기반으로 한 도로 정보 타입
-interface RoadInfo {
-  id: number;
-  name: string;
-  location: string;
-  status: "위험" | "주의" | "안전";
-  statusColor: "red" | "yellow" | "green";
-  damageTypes: string[];
-  damageCount: number;
-  lastDetected: string;
-  cctvCount: number;
-  distance: string;
-  cctvData: CCTVData; // 원본 CCTV 데이터 참조
-}
 
 export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // cctvData를 기반으로 도로 정보 생성
-  // 각 CCTV의 cctvname을 도로명으로 사용하고, 임의로 상태를 부여
 
-  const roadData = useMemo((): RoadInfo[] => {
-    if (mapLevel > 8) {
-      return [];
-    }
+  // 분석 데이터 조회 (서버 데이터 → AnalyzeModel[])
+  const analyzeListQuery = useQuery({
+    queryKey: ["analyzeList"],
+    queryFn: fetchAnalyzeData,
+    staleTime: 60 * 1000,
+  });
 
-    return cctvData.map((cctv, index) => {
-      // CCTV 이름에서 대괄호 안의 내용 추출 (예: "[국도1호선] 파주 봉일천4리" -> "국도1호선")
-      const roadMatch = cctv.cctvname.match(/\[(.*?)\]/);
-      const roadType = roadMatch ? roadMatch[1] : "일반도로";
+  // 서버에서 받은 AnalyzeModel[]
+  const analyzeList = analyzeListQuery.data ?? [];
 
-      // 지역명 추출 (CCTV 이름에서 마지막 부분)
-      const locationParts = cctv.cctvname.replace(/\[.*?\]\s*/, "").trim();
+  // 분석 데이터를 빠르게 조회하기 위한 맵 (키: 정규화된 cctvName)
+  const normalize = (s: string) => (s ?? "").replace(/\s+/g, "").replace(/[()]/g, "").trim();
+  const analyzeMap = useMemo(() => {
+    const m = new Map<string, AnalyzeModel>();
+    for (const a of analyzeList) m.set(normalize(a.cctvName), a);
+    return m;
+  }, [analyzeList]);
 
-      // 인덱스 기반으로 임시 상태 할당 (실제로는 서버에서 받아온 데이터 사용)
-      const statusOptions: Array<{
-        status: "위험" | "주의" | "안전";
-        color: "red" | "yellow" | "green";
-      }> = [
-        { status: "안전", color: "green" },
-        { status: "주의", color: "yellow" },
-        { status: "위험", color: "red" },
-      ];
-      const statusInfo = statusOptions[index % 3];
 
-      // 상태에 따른 가상의 손상 정보 생성
-      let damageTypes: string[] = [];
-      let damageCount = 0;
+  // 유틸: CCTV 이름 → 도로 타입/지역명 파싱
+  const parseName = (full: string) => {
+    const roadMatch = full.match(/\[(.*?)\]/);
+    const roadType = roadMatch ? roadMatch[1] : "일반도로";
+    const location = full.replace(/\[.*?\]\s*/, "").trim();
+    return { roadType, location };
+  };
 
-      if (statusInfo.status === "위험") {
-        damageTypes = ["포트홀", "균열"];
-        damageCount = Math.floor(Math.random() * 5) + 3; // 3-7개
-      } else if (statusInfo.status === "주의") {
-        damageTypes = ["균열"];
-        damageCount = Math.floor(Math.random() * 3) + 1; // 1-3개
-      }
+  // 유틸: 건수 → 상태/색상 매핑
+  const getStatusInfo = (count: number) => {
+    if (count >= 2) return { status: "위험" as const, color: "red" as const };
+    if (count >= 1) return { status: "주의" as const, color: "yellow" as const };
+    return { status: "안전" as const, color: "green" as const };
+  };
+
+  // 유틸: 최근 탐지 시각 표시(간단 상대표현)
+  const getLastDetectedText = (date?: Date) => {
+    if (!date) return "-";
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMin = Math.max(0, Math.floor(diffMs / 60000));
+    if (diffMin <= 1) return "방금 전";
+    if (diffMin < 60) return `${diffMin}분 전`;
+    const diffHr = Math.floor(diffMin / 60);
+    return `${diffHr}시간 전`;
+  };
+
+  // 뷰포트에 보이는 마커(cctvData)를 기준으로 목록 생성 + 분석 정보 조인
+  const rows = useMemo(() => {
+    // mapLevel 비교 안전화(문자/undefined 방어). 너무 멀리서 보면 목록 비움
+    const level = Number(mapLevel ?? 99);
+    if (!Number.isFinite(level) || level > 8) return [];
+
+    return (cctvData ?? []).map((c) => {
+      const { roadType, location } = parseName(c.cctvname);
+      const a = analyzeMap.get(normalize(c.cctvname));
+
+      const damageCount = a ? a.detections.length : 0;
+      const damageTypes = a ? Array.from(new Set(a.detections.map((d) => d.label))) : [];
+      const { status, color } = getStatusInfo(damageCount);
 
       return {
-        id: index + 1,
+        id: (c as any).roadsectionid ?? c.cctvname,
         name: roadType,
-        location: locationParts,
-        status: statusInfo.status,
-        statusColor: statusInfo.color,
+        location,
+        status,
+        statusColor: color,
         damageTypes,
         damageCount,
-        lastDetected:
-          index < 2 ? "방금 전" : `${Math.floor(Math.random() * 30) + 1}분 전`,
-        cctvCount: 1, // 현재는 CCTV 1대당 1개 도로로 표시
-        distance: `${(Math.random() * 3 + 0.5).toFixed(1)}km`,
-        cctvData: cctv,
+        lastDetected: getLastDetectedText(a?.date),
+        cctvData: c,
+        _raw: a,
       };
     });
-  }, [cctvData, mapLevel]);
+  }, [cctvData, analyzeMap, mapLevel]);
 
   // 사용자가 클릭한 CCTV 정보를 보관하는 상태
   // 상세 패널(DetailPanel) 열림/닫힘 상태
@@ -90,9 +103,9 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
 
   // 목록 아이템 클릭 시: 해당 도로를 선택하고 상세 패널을 연다
-  const handleRoadClick = (road: RoadInfo) => {
-    // RoadInfo에서 원본 CCTVData를 추출하여 DetailPanel에 전달
-    setSelectedCCTV(road.cctvData);
+  const handleRoadClick = (road: any) => {
+    // 매핑된 항목에서 원본 CCTVData를 추출하여 DetailPanel에 전달
+    if (road?.cctvData) setSelectedCCTV(road.cctvData);
     setIsDetailPanelOpen(true);
   };
 
@@ -106,19 +119,22 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
   // 1) 상태 필터 조건(selectedFilter)
   // 2) 검색어 포함 여부(도로명 또는 위치에 searchQuery가 포함되는지)
   // 두 조건을 모두 만족하는 항목만 남김
-  const filteredRoads = roadData.filter((road) => {
-    const matchesFilter =
-      selectedFilter === "all" ||
-      (selectedFilter === "danger" && road.status === "위험") ||
-      (selectedFilter === "warning" && road.status === "주의") ||
-      (selectedFilter === "safe" && road.status === "안전");
+  const filteredRoads = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return rows.filter((road) => {
+      const matchesFilter =
+        selectedFilter === "all" ||
+        (selectedFilter === "danger" && road.status === "위험") ||
+        (selectedFilter === "warning" && road.status === "주의") ||
+        (selectedFilter === "safe" && road.status === "안전");
 
-    const matchesSearch =
-      road.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      road.location.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch =
+        road.name.toLowerCase().includes(q) ||
+        road.location.toLowerCase().includes(q);
 
-    return matchesFilter && matchesSearch;
-  });
+      return matchesFilter && matchesSearch;
+    });
+  }, [rows, selectedFilter, searchQuery]);
 
   // 상태 뱃지 렌더링 유틸: 상태값과 색상 키에 따라 Tailwind 클래스를 매핑
   const getStatusBadge = (status: string, color: string) => {
@@ -139,13 +155,25 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
     );
   };
 
+  if (analyzeListQuery.isLoading) {
+    return (
+      <div className="hidden md:flex w-[315px] top-[60px] z-50 bg-gray-50 justify-center overflow-y-auto absolute border-r border-gray-200 shadow-sm" style={{ height: "calc(100vh - 60px)", overflowY: "auto", position: "fixed" }}>
+        <div className="flex items-center justify-center w-full text-sm text-gray-500">분석 데이터를 불러오는 중…</div>
+      </div>
+    );
+  }
+  if (analyzeListQuery.isError) {
+    return (
+      <div className="hidden md:flex w-[315px] top-[60px] z-50 bg-gray-50 justify-center overflow-y-auto absolute border-r border-gray-200 shadow-sm" style={{ height: "calc(100vh - 60px)", overflowY: "auto", position: "fixed" }}>
+        <div className="flex items-center justify-center w-full text-sm text-red-600">분석 데이터를 불러오지 못했습니다</div>
+      </div>
+    );
+  }
+
   return (
     <>
       {/*
-        사이드 패널 래퍼
-        - position: fixed + top 오프셋(배너 높이)을 적용하여 화면 좌측에 고정
-        - height: calc(100vh - 60px) 으로 세로 높이를 배너를 제외한 영역으로 제한
-        - overflow-y: auto 로 패널 내부만 스크롤되게 함
+        사이드 패널 rapper
       */}
       <div
         className="hidden md:flex w-[315px] top-[60px] z-50 bg-gray-50 justify-center overflow-y-auto absolute border-r border-gray-200 shadow-sm"
@@ -178,24 +206,24 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
               />
             </div>
 
-            {/* 요약 카드: roadData에서 상태별 개수를 실시간 계산하여 표시 */}
+            {/* 요약 카드: rows에서 상태별 개수를 실시간 계산하여 표시 */}
             <div className="mt-auto bg-white pb-4">
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="bg-red-50 rounded-lg p-3">
                   <div className="text-lg font-bold text-red-600">
-                    {roadData.filter((r) => r.status === "위험").length}
+                    {rows.filter((r) => r.status === "위험").length}
                   </div>
                   <div className="text-xs text-red-600">위험</div>
                 </div>
                 <div className="bg-yellow-50 rounded-lg p-3">
                   <div className="text-lg font-bold text-yellow-600">
-                    {roadData.filter((r) => r.status === "주의").length}
+                    {rows.filter((r) => r.status === "주의").length}
                   </div>
                   <div className="text-xs text-yellow-600">주의</div>
                 </div>
                 <div className="bg-green-50 rounded-lg p-3">
                   <div className="text-lg font-bold text-green-600">
-                    {roadData.filter((r) => r.status === "안전").length}
+                    {rows.filter((r) => r.status === "안전").length}
                   </div>
                   <div className="text-xs text-green-600">안전</div>
                 </div>

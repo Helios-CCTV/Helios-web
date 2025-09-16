@@ -17,20 +17,22 @@ export default function DetailPanel({
   const [isExpanded, setIsExpanded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // 분석 데이터 쿼리
   const analyzeListQuery = useQuery({
     queryKey: ["analyzeList"],
     queryFn: fetchAnalyzeData,
     staleTime: 60 * 1000,
   });
 
+  // 가져온 분석 데이터 중 data 파트 가져옴
   const analyzerListData = analyzeListQuery.data || [];
 
+  // 선택된 CCTV에 해당하는 분석 데이터 가져오기
   const matchedAnalyze = analyzerListData.find(
     (item) => item.cctvName === selectedcctv.cctvname
   );
 
   // CCTV 데이터를 기반으로 가상의 도로 파손 정보 생성
-  const damageCount = Math.floor(Math.random() * 10) + 1;
   const damageTypes = ["포트홀", "균열", "침하"];
 
   // HLS 영상 초기화
@@ -168,7 +170,7 @@ export default function DetailPanel({
           <div className="h-40 flex items-center justify-center">
             <div className="text-center">
               <div className="w-24 h-24 mx-auto mb-3 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold text-lg">
-                {damageCount}건
+                {matchedAnalyze ? matchedAnalyze.detections.length : 0}건
               </div>
               <div className="text-xs text-gray-600">
                 {damageTypes.join(" • ")}

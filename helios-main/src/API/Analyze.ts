@@ -2,6 +2,7 @@ import axios from "axios";
 
 const CCTV_API_BASE_URL = import.meta.env.VITE_CCTV_API_URL;
 
+// 파손 라벨 종류
 export type DetectionLabel =
   | "반사균열"
   | "세로방향균열"
@@ -17,6 +18,7 @@ export type DetectionLabel =
   | "시공균열"
   | "거북등";
 
+  // API 응답 타입
 export interface AnalyzeResponse {
   id: number;
   cctvName: string;
@@ -25,6 +27,7 @@ export interface AnalyzeResponse {
   detections: DetectionLabel[];
 }
 
+// 가공 된 데이터 타입
 export interface AnalyzeModel {
   id: number;
   cctvName: string;
@@ -34,11 +37,15 @@ export interface AnalyzeModel {
   hasDefect: boolean; // 검출 여부
 }
 
+
+// axios 인스턴스 생성
 const apiClient = axios.create({
   baseURL: CCTV_API_BASE_URL,
   timeout: 500000, // 5초 타임아웃 설정
 });
 
+
+// 분석 데이터 가져오는 함수
 export const fetchAnalyzeData = async (): Promise<AnalyzeModel[]> => {
   const response = await apiClient.get<{ data: AnalyzeResponse[] }>(
     "analyze/get-analyze"
