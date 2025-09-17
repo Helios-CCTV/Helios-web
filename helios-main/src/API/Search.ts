@@ -7,6 +7,7 @@ export interface SearchRequest {
 }
 
 export interface SearchResponse {
+  id: number;
   roadsectionid: string;
   filecreatetime: string;
   cctvtype: number;
@@ -20,6 +21,7 @@ export interface SearchResponse {
 }
 
 export interface SearchModel {
+  id: number;
   cctvType: number;
   cctvUrl: string;
   coorDx: number;
@@ -37,15 +39,15 @@ const apiClient = axios.create({
 export const fetchSearchData = async (
   body: SearchRequest
 ): Promise<SearchModel[]> => {
-  const response = await apiClient.post<{ data: SearchResponse[] }>(
-    "api/cctv/search",
-    null,
+  const response = await apiClient.get<{ data: SearchResponse[] }>(
+    "cctv/search",
     { params: { search: body.query } }
   );
 
   const raw = response.data.data;
 
   return raw.map((item) => ({
+    id: item.id,
     cctvType: item.cctvtype,
     cctvUrl: item.cctvurl,
     coorDx: item.coordx,

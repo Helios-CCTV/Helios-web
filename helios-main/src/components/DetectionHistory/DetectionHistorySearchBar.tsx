@@ -1,32 +1,21 @@
-//import React
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 
-// import API
-import { fetchDetectionData } from "../../API/Detection";
-import type { DetectionModel } from "../../API/Detection";
-
-// 부모로 "선택한 파손 라벨"을 전달하기 위한 props 타입
+// 부모에게 전달할 최소 props: 필터 라벨 변경, 검색 제출
 type Props = {
-  // 필터 탭을 눌렀을 때 호출됩니다. 선택 해제는 null로 전달하세요.
   onFilterLabelChange?: (label: string | null) => void;
+  onSearchSubmit?: (query: string) => void; // Enter/버튼 클릭 시 호출 (빈 문자열이면 초기화 의미)
 };
 
 // 검색창 컴포넌트
 export default function DetectionHistorySearchBar({
   onFilterLabelChange,
+  onSearchSubmit,
 }: Props) {
+  // 사용자가 입력창에 타이핑하는 값 (미제출 상태)
   const [searchQuery, setSearchQuery] = useState("");
+
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedSort, setSelectedSort] = useState("latest");
-
-  const DetectionListQuery = useQuery({
-    queryKey: ["detectionList"],
-    queryFn: fetchDetectionData,
-    staleTime: 60 * 1000,
-  });
-
-  const detectionListData = DetectionListQuery.data || [];
 
   // 필터 탭 정의 (key는 내부 식별자, label은 실제 파손명 - 컨텐츠로 넘길 값)
   const FILTERS = [
@@ -88,14 +77,37 @@ export default function DetectionHistorySearchBar({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      onSearchSubmit?.(searchQuery.trim());
+                    }
+                  }}
                   placeholder="지역명, 도로명으로 검색하세요... (예: 강남구, 테헤란로)"
                   className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
                 {/* 검색 버튼 */}
                 {searchQuery && (
-                  <button className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-[600] transition-colors">
-                    검색
-                  </button>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                    {/* 초기화: 빈 문자열로 부모에 전달 → 일반 데이터 모드 */}
+                    <button
+                      className="px-2.5 py-1 rounded-lg text-xs font-[600] bg-gray-100 hover:bg-gray-200 text-gray-600"
+                      onClick={() => {
+                        setSearchQuery("");
+                        onSearchSubmit?.("");
+                      }}
+                      aria-label="검색어 지우기"
+                      title="검색어 지우기"
+                    >
+                      초기화
+                    </button>
+                    {/* 검색 실행 */}
+                    <button
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-[600] transition-colors"
+                      onClick={() => onSearchSubmit?.(searchQuery.trim())}
+                    >
+                      검색
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -120,7 +132,10 @@ export default function DetectionHistorySearchBar({
           <div className="flex gap-2 overflow-x-auto pb-2">
             {/* 전체(해제) 버튼 */}
             <button
-              onClick={() => { setSelectedFilter("all"); onFilterLabelChange?.(null); }}
+              onClick={() => {
+                setSelectedFilter("all");
+                onFilterLabelChange?.(null);
+              }}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-[600] transition-all whitespace-nowrap ${
                 selectedFilter === "all"
                   ? "bg-gray-800 text-white shadow-md"
@@ -151,11 +166,8 @@ export default function DetectionHistorySearchBar({
           {/* 검색 결과 요약 */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
             <div className="flex items-center gap-4 text-sm text-gray-600">
-              <span>
-                <span className="font-[600] text-gray-800">
-                  {detectionListData.length}
-                </span>
-                개의 탐지 기록
+              <span className="text-gray-600 text-sm">
+                검색어를 입력 후 Enter 또는 검색 버튼을 눌러주세요.
               </span>
             </div>
           </div>
