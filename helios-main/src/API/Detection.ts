@@ -18,10 +18,11 @@ export type DetectionLabel =
   | "시공균열"
   | "거북등";
 
-  // API 응답 타입
+// API 응답 타입
 export interface DetectionResponse {
   id: number;
   cctvName: string;
+  cctvUrl: string;
   analyzeId: number;
   date: string;
   detections: DetectionLabel[];
@@ -31,12 +32,11 @@ export interface DetectionResponse {
 export interface DetectionModel {
   id: number;
   cctvName: string;
+  cctvUrl: string;
   analyzeId: number;
   date: Date; //Date 형태로 변환
   detections: { label: DetectionLabel }[]; // 라벨 종류
-  
 }
-
 
 // axios 인스턴스 생성
 const apiClient = axios.create({
@@ -44,16 +44,17 @@ const apiClient = axios.create({
   timeout: 500000, // 5초 타임아웃 설정
 });
 
-export const fetchDetectionData = async () : Promise<DetectionModel []> => {
-    const response = await apiClient.get<{ data : DetectionResponse []}> (
-        "analyze/get-detected"
-    );
+export const fetchDetectionData = async (): Promise<DetectionModel[]> => {
+  const response = await apiClient.get<{ data: DetectionResponse[] }>(
+    "analyze/get-detected"
+  );
 
-    return response.data.data.map((item) => ({
-        id : item.id,
-        cctvName : item.cctvName,
-        analyzeId : item.analyzeId,
-        date : new Date(item.date),
-        detections : item.detections.map((label) => ({ label })),
-    }))
-}
+  return response.data.data.map((item) => ({
+    id: item.id,
+    cctvName: item.cctvName,
+    cctvUrl: item.cctvUrl,
+    analyzeId: item.analyzeId,
+    date: new Date(item.date),
+    detections: item.detections.map((label) => ({ label })),
+  }));
+};

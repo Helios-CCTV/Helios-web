@@ -1,10 +1,62 @@
+//import React
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+// import API
+import { fetchDetectionData } from "../../API/Detection";
+import type { DetectionModel } from "../../API/Detection";
+
+// 부모로 "선택한 파손 라벨"을 전달하기 위한 props 타입
+type Props = {
+  // 필터 탭을 눌렀을 때 호출됩니다. 선택 해제는 null로 전달하세요.
+  onFilterLabelChange?: (label: string | null) => void;
+};
 
 // 검색창 컴포넌트
-export default function DetectionHistorySearchBar() {
+export default function DetectionHistorySearchBar({
+  onFilterLabelChange,
+}: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedSort, setSelectedSort] = useState("latest");
+
+  const DetectionListQuery = useQuery({
+    queryKey: ["detectionList"],
+    queryFn: fetchDetectionData,
+    staleTime: 60 * 1000,
+  });
+
+  const detectionListData = DetectionListQuery.data || [];
+
+  // 필터 탭 정의 (key는 내부 식별자, label은 실제 파손명 - 컨텐츠로 넘길 값)
+  const FILTERS = [
+    { key: "crack2", label: "반사균열", color: "blue" },
+    { key: "crack3", label: "세로방향균열", color: "red" },
+    { key: "crack4", label: "밀림균열", color: "yellow" },
+    { key: "rutting", label: "러팅", color: "green" },
+    { key: "shoving", label: "코루게이션및쇼빙", color: "orange" },
+    { key: "hammol", label: "함몰", color: "blue" },
+    { key: "pothole", label: "포트홀", color: "green" },
+    { key: "label", label: "라벨링", color: "yellow" },
+    { key: "bakli", label: "박리", color: "blue" },
+    { key: "danbu", label: "단부균열", color: "red" },
+    { key: "sigong", label: "시공균열", color: "yellow" },
+    { key: "turtleback", label: "거북등", color: "orange" },
+  ] as const;
+
+  // 탭 클릭 핸들러: 선택 상태를 업데이트하고, 부모에 "라벨"을 전달
+  const handleFilterClick = (key: string) => {
+    // 같은 버튼을 다시 누르면 선택 해제 (전체 보기)
+    if (selectedFilter === key) {
+      setSelectedFilter("all");
+      onFilterLabelChange?.(null);
+      return;
+    }
+    // 새 선택 적용
+    setSelectedFilter(key);
+    const found = FILTERS.find((f) => f.key === key);
+    onFilterLabelChange?.(found ? found.label : null);
+  };
 
   return (
     <>
@@ -66,29 +118,30 @@ export default function DetectionHistorySearchBar() {
 
           {/* 필터 탭 */}
           <div className="flex gap-2 overflow-x-auto pb-2">
-            {[
-              { key: "crack2", label: "반사균열", color: "blue" },
-              { key: "crack3", label: "세로방향균열", color: "red" },
-              { key: "crack4", label: "밀림균열", color: "yellow" },
-              { key: "rutting", label: "러팅", color: "green" },
-              { key: "shoving", label: "코루게이션및쇼빙", color: "orange" },
-              { key: "hammol", label: "함몰", color: "purple" },
-              { key: "pothole", label: "포트홀", color: "indigo" },
-              { key: "label", label: "라벨링", color: "green" },
-              { key: "bakli", label: "박리", color: "blue" },
-              { key: "normal", label: "정상", color: "gray" },
-              { key: "danbu", label: "단부균열", color: "red" },
-              { key: "sigong", label: "시공균열", color: "yellow" },
-              { key: "turtleback", label: "거북등", color: "orange" },
-            ].map((filter) => (
+            {/* 전체(해제) 버튼 */}
+            <button
+              onClick={() => { setSelectedFilter("all"); onFilterLabelChange?.(null); }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-[600] transition-all whitespace-nowrap ${
+                selectedFilter === "all"
+                  ? "bg-gray-800 text-white shadow-md"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+              }`}
+              aria-pressed={selectedFilter === "all"}
+              aria-label="전체 필터 해제"
+            >
+              <span>전체</span>
+            </button>
+            {FILTERS.map((filter) => (
               <button
                 key={filter.key}
-                onClick={() => setSelectedFilter(filter.key)}
+                onClick={() => handleFilterClick(filter.key)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-[600] transition-all whitespace-nowrap ${
                   selectedFilter === filter.key
                     ? `bg-${filter.color}-500 text-white shadow-md`
                     : `bg-${filter.color}-50 text-${filter.color}-700 hover:bg-${filter.color}-100 border border-${filter.color}-200`
                 }`}
+                aria-pressed={selectedFilter === filter.key}
+                aria-label={`${filter.label} 필터`}
               >
                 <span>{filter.label}</span>
               </button>
@@ -99,13 +152,10 @@ export default function DetectionHistorySearchBar() {
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <span>
-                <span className="font-[600] text-gray-800">2,303</span>개의 탐지
-                기록
-              </span>
-              <span>•</span>
-              <span>
-                마지막 업데이트:{" "}
-                <span className="font-[600] text-gray-800">2분 전</span>
+                <span className="font-[600] text-gray-800">
+                  {detectionListData.length}
+                </span>
+                개의 탐지 기록
               </span>
             </div>
           </div>
