@@ -19,6 +19,7 @@ const CCTV_API_BASE_URL = import.meta.env.VITE_CCTV_API_URL;
  * CCTV 데이터 응답 인터페이스 정의
  */
 export interface CCTVData {
+  id: number; // CCTV 고유 ID
   roadsectionid: string; // 도로 구간 ID
   filecreatetime: string; // 파일 생성 시간
   cctvtype: string; // CCTV 타입 (1: 일반형)
