@@ -31,25 +31,29 @@ export default function DetectionHistoryContent({
     staleTime: 60 * 1000,
   });
 
+  // 탐지 기록 데이터
   const detectionListData = DetectionListQuery.data || [];
 
   // 검색이 있을 때 검색 결과 제공, 없으면 전체 데이터 제공
   const baseDetections = useMemo(() => {
-    const q = (searchData ?? "").trim();
-    if (!q) return detectionListData as DetectionModel[];
+    const q = (searchData ?? "").trim(); // 검색어 공백 제거
+    if (!q) return detectionListData as DetectionModel[]; // 검색어 없으면 전체 데이터
 
-    const results = (searchResultQuery.data ?? []) as { id: number | string }[];
-    if (!results || results.length === 0) return [];
+    const results = (searchResultQuery.data ?? []) as { id: number | string }[]; // 검색 결과 저장
+    if (!results || results.length === 0) return []; // 검색 결과 없으면 빈 배열
 
-    const idSet = new Set<number>(
+    const idSet = new Set<number>( // 검색 결과 ID 집합
       results.map((r) => Number(r.id)).filter((n) => Number.isFinite(n))
     );
-    return (detectionListData as DetectionModel[]).filter((d) =>
-      idSet.has(Number(d.id))
+    return (detectionListData as DetectionModel[]).filter(
+      (
+        d //검색 결과 리턴 (id 제공)
+      ) => idSet.has(Number(d.id))
     );
   }, [detectionListData, searchData, searchResultQuery.data]);
 
-  // - labelFilter가 없으면 전체 컨테츠 제공
+  // 검색 기능 이전 코드
+  // - labelFilter가 없으면 전체 컨텐츠 제공
   // - labelFilter가 있으면 해당 라벨을 가진 CCTV만 남김
   // const filteredDetections = useMemo(() => {
   //   if (!labelFilter) return detectionListData;
@@ -58,6 +62,7 @@ export default function DetectionHistoryContent({
   //   );
   // }, [detectionListData, labelFilter]);
 
+  // 필터링된 탐지 기록 데이터 (라벨 필터), 검색 기록과 비교에서 검색이 존재하면 검색 결과 제공
   const filteredDetections = useMemo(() => {
     if (!labelFilter) return baseDetections;
     return baseDetections.filter((item) =>
@@ -112,6 +117,7 @@ export default function DetectionHistoryContent({
     return pages;
   };
 
+  // 페이지네이션 버튼 목록
   const pageNumbers = useMemo(
     () => getPageNumbers(totalPages, currentPage),
     [totalPages, currentPage]
@@ -139,6 +145,7 @@ export default function DetectionHistoryContent({
   // HLS attach: 모달이 열릴 때 .m3u8 재생 시도
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
 
+  // playerOpen 또는 playerUrl이 바뀔 때마다 재생 시도
   useEffect(() => {
     if (!playerOpen || !playerUrl) return;
     const video = videoRef.current;
