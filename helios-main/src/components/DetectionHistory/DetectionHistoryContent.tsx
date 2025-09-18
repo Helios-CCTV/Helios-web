@@ -6,29 +6,64 @@ import Hls from "hls.js";
 
 // import API
 import { fetchDetectionData } from "../../API/Detection";
+import { fetchSearchData } from "../../API/Search";
 import type { DetectionModel } from "../../API/Detection";
 
 export default function DetectionHistoryContent({
   labelFilter,
+  searchData,
 }: {
   labelFilter?: string | null;
+  searchData?: string | null;
 }) {
+  // 탐지 기록 데이터 API 호출
   const DetectionListQuery = useQuery({
     queryKey: ["detectionList"],
     queryFn: fetchDetectionData,
     staleTime: 60 * 1000,
   });
 
+  // 검색 쿼리가 존재할때 API 호출
+  const searchResultQuery = useQuery({
+    queryKey: ["cctvSearch", searchData],
+    queryFn: () => fetchSearchData({ query: (searchData ?? "").trim() }),
+    enabled: !!(searchData && searchData.trim().length > 0),
+    staleTime: 60 * 1000,
+  });
+
   const detectionListData = DetectionListQuery.data || [];
+
+  // 검색이 있을 때 검색 결과 제공, 없으면 전체 데이터 제공
+  const baseDetections = useMemo(() => {
+    const q = (searchData ?? "").trim();
+    if (!q) return detectionListData as DetectionModel[];
+
+    const results = (searchResultQuery.data ?? []) as { id: number | string }[];
+    if (!results || results.length === 0) return [];
+
+    const idSet = new Set<number>(
+      results.map((r) => Number(r.id)).filter((n) => Number.isFinite(n))
+    );
+    return (detectionListData as DetectionModel[]).filter((d) =>
+      idSet.has(Number(d.id))
+    );
+  }, [detectionListData, searchData, searchResultQuery.data]);
 
   // - labelFilter가 없으면 전체 컨테츠 제공
   // - labelFilter가 있으면 해당 라벨을 가진 CCTV만 남김
+  // const filteredDetections = useMemo(() => {
+  //   if (!labelFilter) return detectionListData;
+  //   return (detectionListData as DetectionModel[]).filter((item) =>
+  //     item.detections.some((d) => d.label === labelFilter)
+  //   );
+  // }, [detectionListData, labelFilter]);
+
   const filteredDetections = useMemo(() => {
-    if (!labelFilter) return detectionListData;
-    return (detectionListData as DetectionModel[]).filter((item) =>
+    if (!labelFilter) return baseDetections;
+    return baseDetections.filter((item) =>
       item.detections.some((d) => d.label === labelFilter)
     );
-  }, [detectionListData, labelFilter]);
+  }, [baseDetections, labelFilter]);
 
   // 10개씩 컨텐츠 제공
   const PER_PAGE = 10; // 한 페이지 표시 개수
@@ -241,7 +276,7 @@ export default function DetectionHistoryContent({
 
             return (
               <div
-                key={item.analyzeId}
+                key={Number(item.id)}
                 className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-200"
               >
                 {/* 모바일 및 태블릿용 레이아웃 */}
