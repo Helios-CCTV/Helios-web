@@ -13,27 +13,33 @@ import { fetchAnalyzeData } from "../../API/Analyze";
 // CCTV 검색 API (Search.ts)
 import { fetchSearchData } from "../../API/Search";
 
-// 현재 선택된 상태 필터(전체/위험/주의/안전)
-// 검색어(실시간 입력값)
+// 부모에게 전달할 props
+type Props = {
+  cctvData: CCTVData[]; // 뷰포트 내의 CCTV 데이터
+  mapLevel: number; // 지도 줌 레벨
+  onFocusCCTV?: (c: CCTVData) => void; // 이거 버그 걸려서 못고치는중
+};
 
-type Props = { cctvData: CCTVData[]; mapLevel: number };
-
-export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
-  const [selectedFilter, setSelectedFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+export default function RoadInsightPanel({
+  cctvData,
+  mapLevel,
+  onFocusCCTV, // 버그 걸림
+}: Props) {
+  const [selectedFilter, setSelectedFilter] = useState("all"); // 선택한 필터 상태
+  const [searchQuery, setSearchQuery] = useState(""); // 검색어의 상태
 
   // 검색어가 있을 때만 서버 검색 실행 (Search.ts의 fetchSearchData 테스트 목적)
   const cctvSearchQuery = useQuery({
-    queryKey: ["cctvSearch", searchQuery],
-    queryFn: () => fetchSearchData({ query: searchQuery }),
-    enabled: searchQuery.trim().length > 0,
-    staleTime: 30 * 1000,
+    queryKey: ["cctvSearch", searchQuery], // 검색어가 바뀔때 실행
+    queryFn: () => fetchSearchData({ query: searchQuery }), // 검색 API 호출
+    enabled: searchQuery.trim().length > 0, // 검색어가 있을 때만 실행
+    staleTime: 30 * 1000, // 캐시 유지
   });
 
   // 분석 데이터 조회 (서버 데이터 → AnalyzeModel[])
   const analyzeListQuery = useQuery({
-    queryKey: ["analyzeList"],
-    queryFn: fetchAnalyzeData,
+    queryKey: ["analyzeList"], // 키
+    queryFn: fetchAnalyzeData, // API 호출
     staleTime: 60 * 1000,
   });
 
@@ -41,13 +47,14 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
   const analyzeList = analyzeListQuery.data ?? [];
 
   const analyzeMap = useMemo(() => {
-    const m = new Map<number, AnalyzeModel>();
+    const m = new Map<number, AnalyzeModel>(); // id값을 이용해 analyze 데이터를 빠르게 찾기 위한 매핑
     for (const a of analyzeList) m.set(a.id, a);
     return m;
   }, [analyzeList]);
 
   // 유틸: CCTV 이름 → 도로 타입/지역명 파싱
   const parseName = (full: string) => {
+    //도로 타입 / 지역명 파싱
     const roadMatch = full.match(/\[(.*?)\]/);
     const roadType = roadMatch ? roadMatch[1] : "일반도로";
     const location = full.replace(/\[.*?\]\s*/, "").trim();
@@ -80,6 +87,7 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
     const level = Number(mapLevel ?? 99);
     if (!Number.isFinite(level) || level > 8) return [];
 
+    // 각 CCTV에 대해 분석 데이터 조인 + 도로명/위치 파싱 + 상태 계산
     return (cctvData ?? []).map((c) => {
       const { roadType, location } = parseName(c.cctvname);
       const a = analyzeMap.get(c.id);
@@ -105,16 +113,36 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
     });
   }, [cctvData, analyzeMap, mapLevel]);
 
-  // 검색 API 결과(고유 id 포함)를 rows 형태로 가공
-  // - analyzeMap은 id 기반이므로 이름 정규화 없이 정확히 조인 가능
-  const buildRowFromSearchItem = (id: number, cctvname: string) => {
+  // 검색 API 결과 아이템을 그대로 DetailPanel에 쓸 수 있도록 CCTVData로 구성
+  // - 재호출 없이 즉시 상세 패널을 열기 위함
+  const buildRowFromSearchItem = (item: any) => {
+    const id = Number(item.id);
+    const cctvname: string = item.cctvName ?? item.cctvname ?? "";
     const { roadType, location } = parseName(cctvname);
+
+    // 분석 데이터 조인 (id 기반)
     const a = analyzeMap.get(id);
     const damageCount = a ? a.detections.length : 0;
     const damageTypes = a
-      ? Array.from(new Set(a.detections.map((d) => d.label)))
+      ? Array.from(new Set(a.detections.map((d: any) => d.label)))
       : [];
     const { status, color } = getStatusInfo(damageCount);
+
+    // 검색 응답을 DetailPanel에서 바로 사용할 수 있는 형태로 매핑
+    const cctvDataFromSearch: CCTVData = {
+      id,
+      cctvname,
+      cctvurl: item.cctvUrl ?? item.cctvurl ?? "",
+      cctvformat: item.cctvFormat ?? item.cctvformat ?? "",
+      coordx: item.coordx ?? "",
+      coordy: item.coordy ?? "",
+      cctvtype: item.cctvtype ?? "",
+      cctvresolution: item.cctvresolution ?? "",
+      roadsectionid: item.roadsectionid ?? "",
+      cctvurl_pre: item.cctvurl_pre ?? null,
+      filecreatetime: item.filecreatetime ?? "",
+    } as CCTVData;
+
     return {
       id, // 리스트 key로도 안전하게 사용
       name: roadType,
@@ -124,7 +152,7 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
       damageTypes,
       damageCount,
       lastDetected: getLastDetectedText(a?.date),
-      cctvData: null as any, // 검색 결과에는 원본 CCTVData가 없으므로 클릭 시 무시
+      cctvData: cctvDataFromSearch, // ✅ 검색에서도 즉시 상세보기 가능
       _raw: a,
     };
   };
@@ -138,12 +166,7 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
     // Search.ts는 가공된 모델에 id와 cctvName을 포함한다고 가정
     return data
       .filter((item) => item && (item.id ?? null) !== null)
-      .map((item) =>
-        buildRowFromSearchItem(
-          Number(item.id),
-          item.cctvName ?? item.cctvname ?? ""
-        )
-      );
+      .map((item) => buildRowFromSearchItem(item));
   }, [rows, cctvSearchQuery.data, searchQuery]);
 
   // 사용자가 클릭한 CCTV 정보를 보관하는 상태
@@ -151,11 +174,23 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
   const [selectedCCTV, setSelectedCCTV] = useState<CCTVData | null>(null);
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
 
-  // 목록 아이템 클릭 시: 해당 도로를 선택하고 상세 패널을 연다
+  // 목록 아이템 클릭 시: 이미 DetailPanel이 열려있으면 먼저 닫고, 새로운 데이터로 다시 연다
   const handleRoadClick = (road: any) => {
-    // 매핑된 항목에서 원본 CCTVData를 추출하여 DetailPanel에 전달
-    if (road?.cctvData) setSelectedCCTV(road.cctvData);
-    setIsDetailPanelOpen(true);
+    const data: CCTVData | undefined = road?.cctvData;
+    if (!data) return;
+
+    // 선택 CCTV 업데이트 + 지도 포커스 요청
+    setSelectedCCTV(data);
+    onFocusCCTV?.(data);
+
+    if (isDetailPanelOpen) {
+      // 중복 마운트를 방지하기 위해 일단 닫고, 다음 틱에서 다시 연다
+      setIsDetailPanelOpen(false);
+      // 다음 렌더 사이클에 열기 (리마운트 보장)
+      setTimeout(() => setIsDetailPanelOpen(true), 0);
+    } else {
+      setIsDetailPanelOpen(true);
+    }
   };
 
   // 상세 패널 닫기: 패널을 닫고 선택된 CCTV 상태를 초기화
@@ -297,6 +332,10 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
   const searchLoading = isSearching && cctvSearchQuery.isLoading;
   const searchErrored = isSearching && cctvSearchQuery.isError;
 
+  // - 검색어가 없으면 뷰포트 기반 rows
+  // - 검색어가 있으면 검색 결과 기반 effectiveRows
+  const countSource = isSearching ? effectiveRows : rows;
+
   return (
     <>
       {/*
@@ -343,24 +382,24 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
               )}
             </div>
 
-            {/* 요약 카드: rows에서 상태별 개수를 실시간 계산하여 표시 */}
+            {/* 요약 카드: rows/검색 결과에서 상태별 개수를 실시간 계산하여 표시 */}
             <div className="mt-auto bg-white pb-4">
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="bg-red-50 rounded-lg p-3">
                   <div className="text-lg font-bold text-red-600">
-                    {rows.filter((r) => r.status === "위험").length}
+                    {countSource.filter((r) => r.status === "위험").length}
                   </div>
                   <div className="text-xs text-red-600">위험</div>
                 </div>
                 <div className="bg-yellow-50 rounded-lg p-3">
                   <div className="text-lg font-bold text-yellow-600">
-                    {rows.filter((r) => r.status === "주의").length}
+                    {countSource.filter((r) => r.status === "주의").length}
                   </div>
                   <div className="text-xs text-yellow-600">주의</div>
                 </div>
                 <div className="bg-green-50 rounded-lg p-3">
                   <div className="text-lg font-bold text-green-600">
-                    {rows.filter((r) => r.status === "안전").length}
+                    {countSource.filter((r) => r.status === "안전").length}
                   </div>
                   <div className="text-xs text-green-600">안전</div>
                 </div>

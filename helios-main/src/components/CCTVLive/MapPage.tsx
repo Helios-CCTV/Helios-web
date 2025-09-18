@@ -38,6 +38,7 @@ type MapPageProps = {
   onBoundsChange?: (bounds: BoundingBox) => void; // 지도 영역 변경
   onData?: (data: CCTVData[]) => void; // CCTV 데이터 변경
   onMapLevelChange?: (level: number) => void; // 지도 레벨 변경
+  focusCCTV?: CCTVData | null; // 외부에서 포커스할 CCTV 데이터
 };
 
 /**
@@ -49,7 +50,8 @@ export default function MapPage({
   onBoundsChange,
   onData,
   onMapLevelChange,
-}: MapPageProps) {
+}: // focusCCTV, 마커 클릭시 좌표 이동인데 동작안되서 일단 빼놈 하 살려줘라 제발
+MapPageProps) {
   // 카카오맵 인스턴스 참조
   const mapRef = useRef<any>(null);
 
@@ -71,6 +73,17 @@ export default function MapPage({
   const [mapLevel, setMapLevel] = useState<number>(9);
 
   const handleRoadClick = (cctvData: CCTVData) => {
+    // 이미 열려있다면 onClose 로직을 먼저 타게 해서 리마운트 효과
+    if (isDetailPanelOpen) {
+      handleCloseDetailPanel();
+      // 다음 틱에 새 데이터로 다시 열기 (덮어쓰기)
+      setTimeout(() => {
+        setSelectedCCTV(cctvData);
+        setIsDetailPanelOpen(true);
+      }, 0);
+      return;
+    }
+    // 닫혀있으면 바로 열기
     setSelectedCCTV(cctvData);
     setIsDetailPanelOpen(true);
   };
@@ -424,23 +437,3 @@ export default function MapPage({
     </div>
   );
 }
-
-// {/* CCTV 개수 표시 카운터 - 우상단에 표시 */}
-// {cctvData && cctvData.length > 0 && (
-//   <div className="absolute top-20 right-4 z-10 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-lg px-4 py-2">
-//     <div className="flex items-center gap-3">
-//       <span className="text-sm font-semibold">📹 실시간 CCTV</span>
-//       {/* 현재 표시된 CCTV 마커 개수 */}
-//       <span className="bg-white text-blue-600 rounded-full px-2 py-1 text-xs font-bold min-w-[1.5rem] text-center">
-//         {cctvData.length}
-//       </span>
-//     </div>
-//   </div>
-// )}
-
-// {/* API URL 디버그 정보 (개발 모드에서만) */}
-// {import.meta.env.DEV && (
-//   <div className="absolute top-30 right-4 z-10 bg-gray-800 text-white rounded-lg shadow-lg px-3 py-2 text-xs opacity-75">
-//     API: {import.meta.env.VITE_CCTV_API_URL}
-//   </div>
-// )}
