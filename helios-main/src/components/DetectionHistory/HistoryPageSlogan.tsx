@@ -3,9 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchDetectionData } from "../../API/Detection";
 import type { DetectionModel } from "../../API/Detection";
 export default function HistoryPageSlogan() {
-  // ---------------------------------------------
   // 실데이터 로딩 (DetectionModel[])
-  // ---------------------------------------------
   const { data: detections = [] } = useQuery<DetectionModel[]>({
     queryKey: ["detectionList"],
     queryFn: fetchDetectionData,
@@ -15,24 +13,34 @@ export default function HistoryPageSlogan() {
   // 유틸: 건수 → 상태 매핑 (팀 정책)
   const getStatusInfo = (count: number) => {
     if (count >= 2) return { status: "위험" as const, color: "red" as const };
-    if (count >= 1) return { status: "주의" as const, color: "yellow" as const };
+    if (count >= 1)
+      return { status: "주의" as const, color: "yellow" as const };
     return { status: "안전" as const, color: "green" as const };
   };
 
   // 위험/주의 구간 집계 (각 CCTV 별 탐지 건수 기반)
   const dangerCount = useMemo(
-    () => detections.filter((d) => getStatusInfo(d.detections.length).status === "위험").length,
+    () =>
+      detections.filter(
+        (d) => getStatusInfo(d.detections.length).status === "위험"
+      ).length,
     [detections]
   );
   const warningCount = useMemo(
-    () => detections.filter((d) => getStatusInfo(d.detections.length).status === "주의").length,
+    () =>
+      detections.filter(
+        (d) => getStatusInfo(d.detections.length).status === "주의"
+      ).length,
     [detections]
   );
 
   // 마지막 업데이트: 가장 최근 date (동일 일시 스펙 → 그대로 최대값 사용)
   const lastUpdatedLabel = useMemo(() => {
     if (detections.length === 0) return "-";
-    const maxDate = detections.reduce((acc, cur) => (cur.date > acc ? cur.date : acc), detections[0].date);
+    const maxDate = detections.reduce(
+      (acc, cur) => (cur.date > acc ? cur.date : acc),
+      detections[0].date
+    );
     // 오늘 여부 판단 후 라벨 결정
     const now = new Date();
     const isSameYMD =
@@ -77,7 +85,9 @@ export default function HistoryPageSlogan() {
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
                 <div>
-                  <div className="text-xl font-[700] text-red-600">{dangerCount}</div>
+                  <div className="text-xl font-[700] text-red-600">
+                    {dangerCount}
+                  </div>
                   <div className="text-sm text-gray-600">위험 구간</div>
                 </div>
               </div>
@@ -86,7 +96,9 @@ export default function HistoryPageSlogan() {
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
                 <div>
-                  <div className="text-xl font-[700] text-yellow-600">{warningCount}</div>
+                  <div className="text-xl font-[700] text-yellow-600">
+                    {warningCount}
+                  </div>
                   <div className="text-sm text-gray-600">주의 구간</div>
                 </div>
               </div>
@@ -95,7 +107,9 @@ export default function HistoryPageSlogan() {
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
                 <div>
-                  <div className="text-xl font-[700] text-blue-600">{lastUpdatedLabel}</div>
+                  <div className="text-xl font-[700] text-blue-600">
+                    {lastUpdatedLabel}
+                  </div>
                   <div className="text-sm text-gray-600">마지막 업데이트</div>
                 </div>
               </div>
