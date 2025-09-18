@@ -10,17 +10,25 @@ import { useQuery } from "@tanstack/react-query";
 import type { CCTVData } from "../../API/cctvAPI";
 import type { AnalyzeModel } from "../../API/Analyze";
 import { fetchAnalyzeData } from "../../API/Analyze";
+// CCTV 검색 API (Search.ts)
+import { fetchSearchData } from "../../API/Search";
 
 // 현재 선택된 상태 필터(전체/위험/주의/안전)
 // 검색어(실시간 입력값)
 
 type Props = { cctvData: CCTVData[]; mapLevel: number };
 
-
 export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // 검색어가 있을 때만 서버 검색 실행 (Search.ts의 fetchSearchData 테스트 목적)
+  const cctvSearchQuery = useQuery({
+    queryKey: ["cctvSearch", searchQuery],
+    queryFn: () => fetchSearchData({ query: searchQuery }),
+    enabled: searchQuery.trim().length > 0,
+    staleTime: 30 * 1000,
+  });
 
   // 분석 데이터 조회 (서버 데이터 → AnalyzeModel[])
   const analyzeListQuery = useQuery({
@@ -32,14 +40,11 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
   // 서버에서 받은 AnalyzeModel[]
   const analyzeList = analyzeListQuery.data ?? [];
 
-  // 분석 데이터를 빠르게 조회하기 위한 맵 (키: 정규화된 cctvName)
-  const normalize = (s: string) => (s ?? "").replace(/\s+/g, "").replace(/[()]/g, "").trim();
   const analyzeMap = useMemo(() => {
-    const m = new Map<string, AnalyzeModel>();
-    for (const a of analyzeList) m.set(normalize(a.cctvName), a);
+    const m = new Map<number, AnalyzeModel>();
+    for (const a of analyzeList) m.set(a.id, a);
     return m;
   }, [analyzeList]);
-
 
   // 유틸: CCTV 이름 → 도로 타입/지역명 파싱
   const parseName = (full: string) => {
@@ -52,7 +57,8 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
   // 유틸: 건수 → 상태/색상 매핑
   const getStatusInfo = (count: number) => {
     if (count >= 2) return { status: "위험" as const, color: "red" as const };
-    if (count >= 1) return { status: "주의" as const, color: "yellow" as const };
+    if (count >= 1)
+      return { status: "주의" as const, color: "yellow" as const };
     return { status: "안전" as const, color: "green" as const };
   };
 
@@ -76,14 +82,16 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
 
     return (cctvData ?? []).map((c) => {
       const { roadType, location } = parseName(c.cctvname);
-      const a = analyzeMap.get(normalize(c.cctvname));
+      const a = analyzeMap.get(c.id);
 
       const damageCount = a ? a.detections.length : 0;
-      const damageTypes = a ? Array.from(new Set(a.detections.map((d) => d.label))) : [];
+      const damageTypes = a
+        ? Array.from(new Set(a.detections.map((d) => d.label)))
+        : [];
       const { status, color } = getStatusInfo(damageCount);
 
       return {
-        id: (c as any).roadsectionid ?? c.cctvname,
+        id: c.id,
         name: roadType,
         location,
         status,
@@ -96,6 +104,47 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
       };
     });
   }, [cctvData, analyzeMap, mapLevel]);
+
+  // 검색 API 결과(고유 id 포함)를 rows 형태로 가공
+  // - analyzeMap은 id 기반이므로 이름 정규화 없이 정확히 조인 가능
+  const buildRowFromSearchItem = (id: number, cctvname: string) => {
+    const { roadType, location } = parseName(cctvname);
+    const a = analyzeMap.get(id);
+    const damageCount = a ? a.detections.length : 0;
+    const damageTypes = a
+      ? Array.from(new Set(a.detections.map((d) => d.label)))
+      : [];
+    const { status, color } = getStatusInfo(damageCount);
+    return {
+      id, // 리스트 key로도 안전하게 사용
+      name: roadType,
+      location,
+      status,
+      statusColor: color,
+      damageTypes,
+      damageCount,
+      lastDetected: getLastDetectedText(a?.date),
+      cctvData: null as any, // 검색 결과에는 원본 CCTVData가 없으므로 클릭 시 무시
+      _raw: a,
+    };
+  };
+
+  // 검색어가 있을 땐 서버 검색 결과를 우선 사용하여 목록을 구성
+  const effectiveRows = useMemo(() => {
+    const q = searchQuery.trim();
+    if (q.length === 0) return rows;
+    const data = (cctvSearchQuery.data ?? []) as any[];
+    if (!data || data.length === 0) return [];
+    // Search.ts는 가공된 모델에 id와 cctvName을 포함한다고 가정
+    return data
+      .filter((item) => item && (item.id ?? null) !== null)
+      .map((item) =>
+        buildRowFromSearchItem(
+          Number(item.id),
+          item.cctvName ?? item.cctvname ?? ""
+        )
+      );
+  }, [rows, cctvSearchQuery.data, searchQuery]);
 
   // 사용자가 클릭한 CCTV 정보를 보관하는 상태
   // 상세 패널(DetailPanel) 열림/닫힘 상태
@@ -121,7 +170,7 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
   // 두 조건을 모두 만족하는 항목만 남김
   const filteredRoads = useMemo(() => {
     const q = searchQuery.toLowerCase();
-    return rows.filter((road) => {
+    return effectiveRows.filter((road) => {
       const matchesFilter =
         selectedFilter === "all" ||
         (selectedFilter === "danger" && road.status === "위험") ||
@@ -134,16 +183,11 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
 
       return matchesFilter && matchesSearch;
     });
-  }, [rows, selectedFilter, searchQuery]);
+  }, [effectiveRows, selectedFilter, searchQuery]);
 
-  // -------------------------------------------------
-  // 간단 페이지네이션 (숫자 버튼, 페이지 이동)
-  //   현재 페이지에 해당하는 10개의 파손정보만 보여줍니다.
-  // -------------------------------------------------
-  
   // 현재 페이지에 대한 상태
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   // 한 페이지에 보여질 숫자
   const PER_PAGE = 10;
 
@@ -191,7 +235,10 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
     return pages;
   };
 
-  const pageNumbers = useMemo(() => getPageNumbers(totalPages, currentPage), [totalPages, currentPage]);
+  const pageNumbers = useMemo(
+    () => getPageNumbers(totalPages, currentPage),
+    [totalPages, currentPage]
+  );
 
   // 상태 뱃지 렌더링 유틸: 상태값과 색상 키에 따라 Tailwind 클래스를 매핑
   const getStatusBadge = (status: string, color: string) => {
@@ -214,18 +261,41 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
 
   if (analyzeListQuery.isLoading) {
     return (
-      <div className="hidden md:flex w-[315px] top-[60px] z-50 bg-gray-50 justify-center overflow-y-auto absolute border-r border-gray-200 shadow-sm" style={{ height: "calc(100vh - 60px)", overflowY: "auto", position: "fixed" }}>
-        <div className="flex items-center justify-center w-full text-sm text-gray-500">분석 데이터를 불러오는 중…</div>
+      <div
+        className="hidden md:flex w-[315px] top-[60px] z-50 bg-gray-50 justify-center overflow-y-auto absolute border-r border-gray-200 shadow-sm"
+        style={{
+          height: "calc(100vh - 60px)",
+          overflowY: "auto",
+          position: "fixed",
+        }}
+      >
+        <div className="flex items-center justify-center w-full text-sm text-gray-500">
+          분석 데이터를 불러오는 중…
+        </div>
       </div>
     );
   }
   if (analyzeListQuery.isError) {
     return (
-      <div className="hidden md:flex w-[315px] top-[60px] z-50 bg-gray-50 justify-center overflow-y-auto absolute border-r border-gray-200 shadow-sm" style={{ height: "calc(100vh - 60px)", overflowY: "auto", position: "fixed" }}>
-        <div className="flex items-center justify-center w-full text-sm text-red-600">분석 데이터를 불러오지 못했습니다</div>
+      <div
+        className="hidden md:flex w-[315px] top-[60px] z-50 bg-gray-50 justify-center overflow-y-auto absolute border-r border-gray-200 shadow-sm"
+        style={{
+          height: "calc(100vh - 60px)",
+          overflowY: "auto",
+          position: "fixed",
+        }}
+      >
+        <div className="flex items-center justify-center w-full text-sm text-red-600">
+          분석 데이터를 불러오지 못했습니다
+        </div>
       </div>
     );
   }
+
+  // 검색 로딩/결과 없음 표시 (검색 중일 때만)
+  const isSearching = searchQuery.trim().length > 0;
+  const searchLoading = isSearching && cctvSearchQuery.isLoading;
+  const searchErrored = isSearching && cctvSearchQuery.isError;
 
   return (
     <>
@@ -261,6 +331,16 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="도로명, 지역 검색..."
               />
+              {isSearching && (
+                <div className="mt-2 text-xs text-gray-500">
+                  {searchLoading && "검색 중…"}
+                  {searchErrored && "검색 실패: 잠시 후 다시 시도하세요"}
+                  {!searchLoading &&
+                    !searchErrored &&
+                    filteredRoads.length === 0 &&
+                    "검색 결과가 없습니다"}
+                </div>
+              )}
             </div>
 
             {/* 요약 카드: rows에서 상태별 개수를 실시간 계산하여 표시 */}
@@ -421,8 +501,6 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
             {/* 페이지네이션: 하단 숫자 버튼 + 이전/다음 */}
             {filteredRoads.length > 0 && (
               <div className="flex items-center justify-center gap-2 mt-4 select-none mb-4">
-                
-
                 {pageNumbers.map((p, idx) =>
                   typeof p === "number" ? (
                     <button
@@ -437,10 +515,11 @@ export default function RoadInsightPanel({ cctvData, mapLevel }: Props) {
                       {p}
                     </button>
                   ) : (
-                    <span key={idx} className="px-1 text-xs text-gray-400">{p}</span>
+                    <span key={idx} className="px-1 text-xs text-gray-400">
+                      {p}
+                    </span>
                   )
                 )}
-
               </div>
             )}
 
