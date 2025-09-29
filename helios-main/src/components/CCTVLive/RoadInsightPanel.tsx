@@ -21,6 +21,9 @@ type Props = {
   onFocusCCTV?: (c: CCTVData) => void; // 이거 버그 걸려서 못고치는중
 };
 
+// RoadInsightPanel과 DetailPanel의 값이 서로 다름
+// 해당 버그 수정이 필요함, 우선적으로 문제가 있지 않아 내비둠
+
 export default function RoadInsightPanel({
   cctvData,
   mapLevel,
