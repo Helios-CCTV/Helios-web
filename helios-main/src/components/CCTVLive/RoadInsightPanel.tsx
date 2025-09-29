@@ -3,7 +3,8 @@
 
 // React 필요 import
 import { useState, useMemo, useEffect } from "react";
-import DetailPanel from "./DetailPanel";
+// import DetailPanel from "./DetailPanel";
+import { useDetailPanelStore } from "../../stores/detailPanelStore";
 import { useQuery } from "@tanstack/react-query";
 
 // 타입, API import
@@ -169,35 +170,26 @@ export default function RoadInsightPanel({
       .map((item) => buildRowFromSearchItem(item));
   }, [rows, cctvSearchQuery.data, searchQuery]);
 
-  // 사용자가 클릭한 CCTV 정보를 보관하는 상태
-  // 상세 패널(DetailPanel) 열림/닫힘 상태
-  const [selectedCCTV, setSelectedCCTV] = useState<CCTVData | null>(null);
-  const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
+  // 목록 아이템 클릭 시: 전역 DetailPanel 스토어를 사용해 열거나(처음), 교체(이미 열림)합니다.
+  const openDetail = useDetailPanelStore((s) => s.open);
+  const replaceDetail = useDetailPanelStore((s) => s.replace);
+  const isDetailOpen = useDetailPanelStore((s) => s.isOpen);
 
-  // 목록 아이템 클릭 시: 이미 DetailPanel이 열려있으면 먼저 닫고, 새로운 데이터로 다시 연다
   const handleRoadClick = (road: any) => {
     const data: CCTVData | undefined = road?.cctvData;
     if (!data) return;
 
-    // 선택 CCTV 업데이트 + 지도 포커스 요청
-    setSelectedCCTV(data);
+    // 지도 포커스 요청은 그대로 유지(옵션)
     onFocusCCTV?.(data);
 
-    if (isDetailPanelOpen) {
-      // 중복 마운트를 방지하기 위해 일단 닫고, 다음 틱에서 다시 연다
-      setIsDetailPanelOpen(false);
-      // 다음 렌더 사이클에 열기 (리마운트 보장)
-      setTimeout(() => setIsDetailPanelOpen(true), 0);
+    // 패널 열기/교체
+    if (isDetailOpen) {
+      replaceDetail(data);
     } else {
-      setIsDetailPanelOpen(true);
+      openDetail(data);
     }
   };
 
-  // 상세 패널 닫기: 패널을 닫고 선택된 CCTV 상태를 초기화
-  const handleCloseDetailPanel = () => {
-    setIsDetailPanelOpen(false);
-    setSelectedCCTV(null);
-  };
 
   // 화면에 표시할 목록을 계산
   // 1) 상태 필터 조건(selectedFilter)
@@ -577,15 +569,6 @@ export default function RoadInsightPanel({
         </div>
       </div>
 
-      {/* DetailPanel: CCTV 선택 시에만 우측에서 오버레이로 표시됨 */}
-      {isDetailPanelOpen && selectedCCTV && (
-        <>
-          <DetailPanel
-            selectedcctv={selectedCCTV}
-            onClose={handleCloseDetailPanel}
-          />
-        </>
-      )}
     </>
   );
 }

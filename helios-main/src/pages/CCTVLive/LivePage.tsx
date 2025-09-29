@@ -8,14 +8,8 @@ import type { CCTVData } from "../../API/cctvAPI";
 export default function LivePage() {
   const [cctvData, setCctvData] = useState<CCTVData[]>([]);
   const [mapLevel, setMapLevel] = useState<number>(8);
-  const [focusCCTV, setFocusCCTV] = useState<CCTVData | null>(null);
 
   const handleBoundsChange = useCallback(() => {}, []);
-
-  const handleFocusCCTV = useCallback((c: CCTVData) => {
-    if (!c) return;
-    setFocusCCTV(c);
-  }, []);
 
   return (
     <>
@@ -24,14 +18,12 @@ export default function LivePage() {
         <RoadInsightPanel
           cctvData={cctvData}
           mapLevel={mapLevel}
-          onFocusCCTV={handleFocusCCTV}
         />
       </div>
       <MapPage
         onBoundsChange={handleBoundsChange}
         onData={(data) => setCctvData(data)}
         onMapLevelChange={setMapLevel}
-        focusCCTV={focusCCTV}
       />
     </>
   );

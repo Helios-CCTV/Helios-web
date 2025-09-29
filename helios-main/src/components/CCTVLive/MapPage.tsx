@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import DetailPanel from "./DetailPanel";
-
 import {
   fetchCCTVDataByBounds,
   getCCTVQueryKey,
   type CCTVData,
   type BoundingBox,
 } from "../../API/cctvAPI.ts";
+import { useDetailPanelStore } from "../../stores/detailPanelStore";
 
 /**
  * 카카오맵 전역 객체 타입 선언
@@ -50,8 +49,7 @@ export default function MapPage({
   onBoundsChange,
   onData,
   onMapLevelChange,
-}: // focusCCTV, 마커 클릭시 좌표 이동인데 동작안되서 일단 빼놈 하 살려줘라 제발
-MapPageProps) {
+}: MapPageProps) {
   // 카카오맵 인스턴스 참조
   const mapRef = useRef<any>(null);
 
@@ -64,33 +62,20 @@ MapPageProps) {
   // 현재 지도 영역의 경계 좌표 상태
   const [currentBounds, setCurrentBounds] = useState<BoundingBox | null>(null);
 
-  // 선택한 CCTV에 대한 정보 상태
-  const [selectedCCTV, setSelectedCCTV] = useState<CCTVData | null>(null);
-
-  // DetailPanel의 열림 상태
-  const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
-
   const [mapLevel, setMapLevel] = useState<number>(9);
 
-  const handleRoadClick = (cctvData: CCTVData) => {
-    // 이미 열려있다면 onClose 로직을 먼저 타게 해서 리마운트 효과
-    if (isDetailPanelOpen) {
-      handleCloseDetailPanel();
-      // 다음 틱에 새 데이터로 다시 열기 (덮어쓰기)
-      setTimeout(() => {
-        setSelectedCCTV(cctvData);
-        setIsDetailPanelOpen(true);
-      }, 0);
-      return;
-    }
-    // 닫혀있으면 바로 열기
-    setSelectedCCTV(cctvData);
-    setIsDetailPanelOpen(true);
-  };
+  // 전역 DetailPanel 스토어 사용: 열기/교체/열림 상태
+  const openDetail = useDetailPanelStore((s) => s.open);
+  const replaceDetail = useDetailPanelStore((s) => s.replace);
+  const isDetailOpen = useDetailPanelStore((s) => s.isOpen);
 
-  const handleCloseDetailPanel = () => {
-    setIsDetailPanelOpen(false);
-    setSelectedCCTV(null);
+  const handleRoadClick = (cctvData: CCTVData) => {
+    // 이미 열려 있으면 데이터만 교체하여 깜빡임 없이 갱신
+    if (isDetailOpen) {
+      replaceDetail(cctvData);
+    } else {
+      openDetail(cctvData);
+    }
   };
 
   // React Query를 사용한 CCTV 데이터 패칭
@@ -288,7 +273,7 @@ MapPageProps) {
         }
       });
     },
-    [onMapLevelChange, mapLevel]
+    [onMapLevelChange, mapLevel, handleRoadClick]
   );
 
   /**
@@ -423,16 +408,6 @@ MapPageProps) {
             {error instanceof Error ? error.message : "알 수 없는 오류"}
           </span>
         </div>
-      )}
-
-      {/* DetailPanel, 마커 클릭시 정보 제공과 동시에 표시됨 */}
-      {isDetailPanelOpen && selectedCCTV && (
-        <>
-          <DetailPanel
-            selectedcctv={selectedCCTV}
-            onClose={handleCloseDetailPanel}
-          />
-        </>
       )}
     </div>
   );
