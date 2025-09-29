@@ -24,29 +24,45 @@ export default function DetailPanel({
     staleTime: 60 * 1000,
   });
 
-  // 가져온 분석 데이터 중 data 파트 가져옴
-  const analyzerListData = analyzeListQuery.data || [];
-
-  // 전체 분석결과 값에서 선택된 CCTV 이름과 매칭되는 결과 찾기
-  // find 함수를 이용
-  const matchedAnalyze = analyzerListData.find(
-    (item) => item.cctvName === selectedcctv.cctvname
-  );
-
-  // 탐지된 유형 목록 만들기
-  const damageTypes = matchedAnalyze
-    ? Array.from(new Set(matchedAnalyze.detections.map((d: any) => d.label)))
+  // API 스키마가 {success, code, message, data:[...]} 또는 배열 both 지원
+  const analyzerListData: any[] = Array.isArray(
+    (analyzeListQuery.data as any)?.data
+  )
+    ? (analyzeListQuery.data as any).data
+    : Array.isArray(analyzeListQuery.data)
+    ? (analyzeListQuery.data as any[])
     : [];
 
-  // 최근 탐지된 결과값을 하나의 표 형태로 변환
-  // date, type, count, severity 필드로 설정
-  const detectionHistory = matchedAnalyze
-    ? matchedAnalyze.detections.map((d: any) => ({
-        date: d.date ?? "-",       // API에서 제공하는 날짜 필드
-        type: d.label,
-        count: d.count ?? 1,       // count 필드 있으면 사용, 없으면 1
-        severity: d.severity ?? "주의", // severity 필드 있으면 사용
-      }))
+  // ✅ id 우선 매칭 (이름 포맷 이슈 방지). 필요 시 이름은 보조(fallback)
+  const matchedAnalyze = analyzerListData.find(
+    (item: any) =>
+      item?.id === selectedcctv.id ||
+      item?.cctvId === selectedcctv.id ||
+      item?.analyzeId === selectedcctv.analyzeId || // 일부 스키마 대비
+      item?.cctvName === selectedcctv.cctvname
+  );
+
+  // detections가 string[] 또는 {label:string}[] 모두 대응
+  const damageTypes = matchedAnalyze?.detections
+    ? Array.from(
+        new Set(
+          (matchedAnalyze.detections as any[])
+            .map((d: any) => (typeof d === "string" ? d : d?.label ?? ""))
+            .filter(Boolean)
+        )
+      )
+    : [];
+
+  const detectionHistory = matchedAnalyze?.detections
+    ? (matchedAnalyze.detections as any[]).map((d: any) => {
+        const type = typeof d === "string" ? d : d?.label ?? "-";
+        return {
+          date: (typeof d !== "string" ? d?.date : undefined) ?? "-",
+          type,
+          count: (typeof d !== "string" ? d?.count : undefined) ?? 1,
+          severity: (typeof d !== "string" ? d?.severity : undefined) ?? "주의",
+        };
+      })
     : [];
 
   // HLS 영상 초기화
@@ -79,7 +95,17 @@ export default function DetailPanel({
     console.log("분석 데이터:", analyzerListData);
   }
 
-  const riskLevel = 65; // 위험도 퍼센티지
+  // 탐지 건수 기반 위험도 계산:
+  // 0건 → 안전~보통 사이(약 25%),
+  // 1건 → 보통~주의 사이(약 50%),
+  // 2건 이상 → 주의~위험 사이(약 80%)
+  const detectionsCount = matchedAnalyze?.detections?.length ?? 0;
+
+  const riskLevel = (() => {
+    if (detectionsCount <= 0) return 25; // 안전과 보통 사이
+    if (detectionsCount === 1) return 50; // 보통과 주의 사이
+    return 80; // 주의와 위험 사이
+  })();
 
   return (
     <div
@@ -180,8 +206,9 @@ export default function DetailPanel({
               </div>
               <div className="text-xs text-gray-600">
                 {/* 탐지된 유형 목록 */}
-                {damageTypes.length > 0 ? damageTypes.join(" • ") : "탐지된 유형 없음"} 
-                
+                {damageTypes.length > 0
+                  ? damageTypes.join(" • ")
+                  : "탐지된 유형 없음"}
               </div>
             </div>
           </div>
@@ -271,18 +298,6 @@ export default function DetailPanel({
               <span>위험</span>
             </div>
           </div>
-
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-orange-600">⚠️</span>
-              <span className="text-sm font-semibold text-orange-800">
-                주의 필요
-              </span>
-            </div>
-            <p className="text-xs text-orange-700">
-              포트홀 발생 빈도가 증가하고 있습니다. 정기 점검을 권장합니다.
-            </p>
-          </div>
         </div>
 
         {/* CCTV 영상 */}
@@ -336,7 +351,7 @@ export default function DetailPanel({
                   월간 평균
                 </span>
               </div>
-              <div className="text-xl font-bold text-blue-600">23회</div>
+              <div className="text-xl font-bold text-blue-600">0회</div>
             </div>
 
             <div className="bg-red-50 rounded-lg p-4 text-center border border-red-200">
@@ -345,13 +360,7 @@ export default function DetailPanel({
                   총 누적
                 </span>
               </div>
-              <div className="text-xl font-bold text-red-600">300회</div>
-            </div>
-          </div>
-
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-            <div className="text-xs text-gray-600 text-center">
-              💡 <strong>Tip:</strong> 지난 달 대비 신고 건수가 15% 증가했습니다
+              <div className="text-xl font-bold text-red-600">0회</div>
             </div>
           </div>
         </div>

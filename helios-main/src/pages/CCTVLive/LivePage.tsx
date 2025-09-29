@@ -15,7 +15,10 @@ export default function LivePage() {
     <>
       <div className="flex w-full">
         <Banner />
-        <RoadInsightPanel cctvData={cctvData} mapLevel={mapLevel} />
+        <RoadInsightPanel
+          cctvData={cctvData}
+          mapLevel={mapLevel}
+        />
       </div>
       <MapPage
         onBoundsChange={handleBoundsChange}

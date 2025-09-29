@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import DetailPanel from "./DetailPanel";
-
 import {
   fetchCCTVDataByBounds,
   getCCTVQueryKey,
   type CCTVData,
   type BoundingBox,
 } from "../../API/cctvAPI.ts";
+import { useDetailPanelStore } from "../../stores/detailPanelStore";
 
 /**
  * 카카오맵 전역 객체 타입 선언
@@ -38,6 +37,7 @@ type MapPageProps = {
   onBoundsChange?: (bounds: BoundingBox) => void; // 지도 영역 변경
   onData?: (data: CCTVData[]) => void; // CCTV 데이터 변경
   onMapLevelChange?: (level: number) => void; // 지도 레벨 변경
+  focusCCTV?: CCTVData | null; // 외부에서 포커스할 CCTV 데이터
 };
 
 /**
@@ -62,22 +62,20 @@ export default function MapPage({
   // 현재 지도 영역의 경계 좌표 상태
   const [currentBounds, setCurrentBounds] = useState<BoundingBox | null>(null);
 
-  // 선택한 CCTV에 대한 정보 상태
-  const [selectedCCTV, setSelectedCCTV] = useState<CCTVData | null>(null);
-
-  // DetailPanel의 열림 상태
-  const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
-
   const [mapLevel, setMapLevel] = useState<number>(9);
 
-  const handleRoadClick = (cctvData: CCTVData) => {
-    setSelectedCCTV(cctvData);
-    setIsDetailPanelOpen(true);
-  };
+  // 전역 DetailPanel 스토어 사용: 열기/교체/열림 상태
+  const openDetail = useDetailPanelStore((s) => s.open);
+  const replaceDetail = useDetailPanelStore((s) => s.replace);
+  const isDetailOpen = useDetailPanelStore((s) => s.isOpen);
 
-  const handleCloseDetailPanel = () => {
-    setIsDetailPanelOpen(false);
-    setSelectedCCTV(null);
+  const handleRoadClick = (cctvData: CCTVData) => {
+    // 이미 열려 있으면 데이터만 교체하여 깜빡임 없이 갱신
+    if (isDetailOpen) {
+      replaceDetail(cctvData);
+    } else {
+      openDetail(cctvData);
+    }
   };
 
   // React Query를 사용한 CCTV 데이터 패칭
@@ -275,7 +273,7 @@ export default function MapPage({
         }
       });
     },
-    [onMapLevelChange, mapLevel]
+    [onMapLevelChange, mapLevel, handleRoadClick]
   );
 
   /**
@@ -411,36 +409,6 @@ export default function MapPage({
           </span>
         </div>
       )}
-
-      {/* DetailPanel, 마커 클릭시 정보 제공과 동시에 표시됨 */}
-      {isDetailPanelOpen && selectedCCTV && (
-        <>
-          <DetailPanel
-            selectedcctv={selectedCCTV}
-            onClose={handleCloseDetailPanel}
-          />
-        </>
-      )}
     </div>
   );
 }
-
-// {/* CCTV 개수 표시 카운터 - 우상단에 표시 */}
-// {cctvData && cctvData.length > 0 && (
-//   <div className="absolute top-20 right-4 z-10 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-lg px-4 py-2">
-//     <div className="flex items-center gap-3">
-//       <span className="text-sm font-semibold">📹 실시간 CCTV</span>
-//       {/* 현재 표시된 CCTV 마커 개수 */}
-//       <span className="bg-white text-blue-600 rounded-full px-2 py-1 text-xs font-bold min-w-[1.5rem] text-center">
-//         {cctvData.length}
-//       </span>
-//     </div>
-//   </div>
-// )}
-
-// {/* API URL 디버그 정보 (개발 모드에서만) */}
-// {import.meta.env.DEV && (
-//   <div className="absolute top-30 right-4 z-10 bg-gray-800 text-white rounded-lg shadow-lg px-3 py-2 text-xs opacity-75">
-//     API: {import.meta.env.VITE_CCTV_API_URL}
-//   </div>
-// )}

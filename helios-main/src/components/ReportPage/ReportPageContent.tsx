@@ -1,26 +1,87 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+
+import { postReport } from "../../API/ReportPost";
+
+// 이 페이지에서 사용할 폼 상태 타입
+type FormState = {
+  damageType: string;
+  location: string;
+  description: string;
+  severity: number; // 1(경미), 2(보통), 3(심각)
+  contactName: string;
+  contactPhone: string;
+  photos: File[];
+};
 
 export default function ReportPageContent() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormState>({
     damageType: "",
     location: "",
     description: "",
-    severity: "",
+    severity: 0,
     contactName: "",
     contactPhone: "",
     photos: [],
   });
 
-  const handleInputChange = (field: string, value: string) => {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleInputChange = (
+    field: keyof FormState,
+    value: string | number
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 사진 선택 핸들러 (최대 5장 저장, API 전송은 첫 장만 사용)
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setFormData((prev) => ({ ...prev, photos: files.slice(0, 5) }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("신고가 접수되었습니다. 빠른 시일 내에 처리하겠습니다.");
+
+    if (!formData.damageType || !formData.location || !formData.severity) {
+      return; // 버튼 disabled로 가드되지만, 이중 보호
+    }
+
+    try {
+      setSubmitting(true);
+      await postReport({
+        damageType: formData.damageType,
+        location: formData.location,
+        severity: formData.severity,
+        description: formData.description || "",
+        name: formData.contactName || "",
+        contact: formData.contactPhone || "",
+        isChecked: false,
+        photo: formData.photos[0] ?? null, // API 스펙: 단일 photo
+      });
+
+      alert("신고가 접수되었습니다. 빠른 시일 내에 처리하겠습니다.");
+
+      // 전송 후 폼 초기화
+      setFormData({
+        damageType: "",
+        location: "",
+        description: "",
+        severity: 0,
+        contactName: "",
+        contactPhone: "",
+        photos: [],
+      });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (err) {
+      console.error(err);
+      alert("신고 접수에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -55,26 +116,26 @@ export default function ReportPageContent() {
               </label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
-                  "포트홀",
-                  "균열",
-                  "침하",
-                  "함몰",
-                  "시공균열",
-                  "거북등",
-                  "쇼빙",
-                  "기타",
+                  { label: "포트홀", value: "POTHOLE" },
+                  { label: "균열", value: "CRACK" },
+                  { label: "침하", value: "SETTLEMENT" },
+                  { label: "함몰", value: "SINKHOLE" },
+                  { label: "시공균열", value: "CONSTRUCTION_CRACK" },
+                  { label: "거북등", value: "ALLIGATOR_CRACK" },
+                  { label: "쇼빙", value: "SHOVING" },
+                  { label: "기타", value: "ETC" },
                 ].map((type) => (
                   <button
-                    key={type}
+                    key={type.value}
                     type="button"
-                    onClick={() => handleInputChange("damageType", type)}
+                    onClick={() => handleInputChange("damageType", type.value)}
                     className={`p-4 rounded-xl border-2 transition-all font-medium ${
-                      formData.damageType === type
+                      formData.damageType === type.value
                         ? "border-blue-500 bg-blue-50 text-blue-700"
                         : "border-gray-200 hover:border-gray-300 text-gray-700"
                     }`}
                   >
-                    {type}
+                    {type.label}
                   </button>
                 ))}
               </div>
@@ -95,13 +156,6 @@ export default function ReportPageContent() {
                   placeholder="예: 강남구 테헤란로 123번길 앞"
                   className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors text-gray-800 placeholder-gray-400"
                 />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-600 font-medium"
-                  onClick={() => alert("지도에서 위치 선택 기능")}
-                >
-                  📍
-                </button>
               </div>
             </div>
 
@@ -113,19 +167,19 @@ export default function ReportPageContent() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {[
                   {
-                    value: "low",
+                    value: 1,
                     label: "경미",
                     color: "green",
                     desc: "작은 균열, 표면 손상",
                   },
                   {
-                    value: "medium",
+                    value: 2,
                     label: "보통",
                     color: "yellow",
                     desc: "피해가 발생할 수 있는 크기",
                   },
                   {
-                    value: "high",
+                    value: 3,
                     label: "심각",
                     color: "red",
                     desc: "사고가 발생할 수 있는 크기",
@@ -180,16 +234,32 @@ export default function ReportPageContent() {
                 <p className="text-gray-600 mb-2">
                   사진을 드래그하거나 클릭해서 업로드
                 </p>
-                <p className="text-sm text-gray-500">
-                  최대 5장까지 업로드 가능 (JPG, PNG)
-                </p>
-                <button
-                  type="button"
-                  className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                  onClick={() => alert("사진 업로드 기능")}
-                >
-                  사진 선택
-                </button>
+                <p className="text-sm text-gray-500">한장만 업로드해주세요.</p>
+                {/* 실제 업로드 입력은 숨기고 버튼으로 트리거 */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                {formData.photos.length > 0 ? (
+                  <div className="mt-4 text-green-600 font-semibold">
+                    사진이 업로드되었습니다.
+                    <div className="text-sm text-gray-700 mt-1">
+                      {formData.photos[0]?.name}
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    사진 선택
+                  </button>
+                )}
               </div>
             </div>
 
@@ -228,13 +298,14 @@ export default function ReportPageContent() {
               <button
                 type="submit"
                 disabled={
+                  submitting ||
                   !formData.damageType ||
                   !formData.location ||
                   !formData.severity
                 }
                 className="w-full py-4 bg-blue-500 text-white text-lg font-semibold rounded-xl hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
-                신고 접수하기
+                {submitting ? "접수 중..." : "신고 접수하기"}
               </button>
               <p className="text-sm text-gray-500 text-center mt-3">
                 신고 접수 후 24시간 이내에 검토 결과를 알려드립니다.
