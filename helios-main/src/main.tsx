@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./index.css";
 import App from "./App.tsx";
 
+
+
 // React Query 클라이언트 생성
 const queryClient = new QueryClient({
   defaultOptions: {
