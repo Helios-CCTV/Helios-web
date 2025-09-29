@@ -42,10 +42,22 @@ export default function RoadInsightPanel({
     queryKey: ["analyzeList"], // 키
     queryFn: fetchAnalyzeData, // API 호출
     staleTime: 60 * 1000,
+    select: (raw: any): AnalyzeModel[] => {
+      return Array.isArray(raw?.data)
+        ? raw.data
+        : Array.isArray(raw)
+        ? raw
+        : [];
+    },
   });
 
   // 서버에서 받은 AnalyzeModel[]
-  const analyzeList = analyzeListQuery.data ?? [];
+  const raw = analyzeListQuery.data as any;
+  const analyzeList: AnalyzeModel[] = Array.isArray(raw?.data)
+    ? (raw.data as AnalyzeModel[])
+    : Array.isArray(raw)
+    ? (raw as AnalyzeModel[])
+    : [];
 
   const analyzeMap = useMemo(() => {
     const m = new Map<number, AnalyzeModel>(); // id값을 이용해 analyze 데이터를 빠르게 찾기 위한 매핑
@@ -189,7 +201,6 @@ export default function RoadInsightPanel({
       openDetail(data);
     }
   };
-
 
   // 화면에 표시할 목록을 계산
   // 1) 상태 필터 조건(selectedFilter)
@@ -568,7 +579,6 @@ export default function RoadInsightPanel({
           </div>
         </div>
       </div>
-
     </>
   );
 }

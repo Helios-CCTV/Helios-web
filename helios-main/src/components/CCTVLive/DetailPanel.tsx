@@ -24,29 +24,43 @@ export default function DetailPanel({
     staleTime: 60 * 1000,
   });
 
-  // 가져온 분석 데이터 중 data 파트 가져옴
-  const analyzerListData = analyzeListQuery.data || [];
-
-  // 전체 분석결과 값에서 선택된 CCTV 이름과 매칭되는 결과 찾기
-  // find 함수를 이용
-  const matchedAnalyze = analyzerListData.find(
-    (item) => item.cctvName === selectedcctv.cctvname
-  );
-
-  // 탐지된 유형 목록 만들기
-  const damageTypes = matchedAnalyze
-    ? Array.from(new Set(matchedAnalyze.detections.map((d: any) => d.label)))
+  // API 스키마가 {success, code, message, data:[...]} 또는 배열 both 지원
+  const analyzerListData: any[] = Array.isArray((analyzeListQuery.data as any)?.data)
+    ? (analyzeListQuery.data as any).data
+    : Array.isArray(analyzeListQuery.data)
+    ? (analyzeListQuery.data as any[])
     : [];
 
-  // 최근 탐지된 결과값을 하나의 표 형태로 변환
-  // date, type, count, severity 필드로 설정
-  const detectionHistory = matchedAnalyze
-    ? matchedAnalyze.detections.map((d: any) => ({
-        date: d.date ?? "-",       // API에서 제공하는 날짜 필드
-        type: d.label,
-        count: d.count ?? 1,       // count 필드 있으면 사용, 없으면 1
-        severity: d.severity ?? "주의", // severity 필드 있으면 사용
-      }))
+  // ✅ id 우선 매칭 (이름 포맷 이슈 방지). 필요 시 이름은 보조(fallback)
+  const matchedAnalyze = analyzerListData.find(
+    (item: any) =>
+      item?.id === selectedcctv.id ||
+      item?.cctvId === selectedcctv.id ||
+      item?.analyzeId === selectedcctv.analyzeId || // 일부 스키마 대비
+      item?.cctvName === selectedcctv.cctvname
+  );
+
+  // detections가 string[] 또는 {label:string}[] 모두 대응
+  const damageTypes = matchedAnalyze?.detections
+    ? Array.from(
+        new Set(
+          (matchedAnalyze.detections as any[]).map((d: any) =>
+            typeof d === "string" ? d : d?.label ?? ""
+          ).filter(Boolean)
+        )
+      )
+    : [];
+
+  const detectionHistory = matchedAnalyze?.detections
+    ? (matchedAnalyze.detections as any[]).map((d: any) => {
+        const type = typeof d === "string" ? d : d?.label ?? "-";
+        return {
+          date: (typeof d !== "string" ? d?.date : undefined) ?? "-",
+          type,
+          count: (typeof d !== "string" ? d?.count : undefined) ?? 1,
+          severity: (typeof d !== "string" ? d?.severity : undefined) ?? "주의",
+        };
+      })
     : [];
 
   // HLS 영상 초기화
