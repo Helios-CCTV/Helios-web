@@ -38,7 +38,6 @@ export default function DetailPanel({
     (item: any) =>
       item?.id === selectedcctv.id ||
       item?.cctvId === selectedcctv.id ||
-      item?.analyzeId === selectedcctv.analyzeId || // 일부 스키마 대비
       item?.cctvName === selectedcctv.cctvname
   );
 

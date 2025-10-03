@@ -14,6 +14,6 @@ export const useDetailPanelStore = create<DetailPanelState>()((set) => ({
   isOpen: false,
   selected: null,
   open: (data) => set({ isOpen: true, selected: data }),
-  replace: (data) => set((s) => ({ isOpen: true, selected: data })),
+  replace: (data) => set(() => ({ isOpen: true, selected: data })),
   close: () => set({ isOpen: false, selected: null }),
 }));
